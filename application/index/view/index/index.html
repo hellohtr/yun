@@ -1,0 +1,187 @@
+{include file="index/header"}
+
+<ul class="layui-nav layui-nav-tree" lay-filter="test" style="height: 100%;position:absolute;top: 0;padding-top: 60px" id="menu">
+
+
+    <li class="layui-nav-item menu-active"><a href="javascript:;">全部文件</a></li>
+    <li class="layui-nav-item"><a href="javascript:;">图片</a></li>
+    <li class="layui-nav-item"><a href="javascript:;">文档</a></li>
+    <li class="layui-nav-item"><a href="javascript:;">音乐</a></li>
+    <li class="layui-nav-item"><a href="javascript:;">视频</a></li>
+    <li class="layui-nav-item"><a href="javascript:;">其他</a></li>
+    <li class="layui-nav-item"><a href="javascript:;">我的分享</a></li>
+    <li class="layui-nav-item"><a href="javascript:;">回收站</a></li>
+</ul>
+<div class="container">
+    <div class="container-top">
+        <button type="button" class="layui-btn   layui-btn-normal layui-btn-sm" id="upload">
+        <i class="layui-icon">&#xe67c;</i>上传文件
+        </button>
+        <input type="file" id="uploadfile" hidden>
+
+        <button class="layui-btn layui-btn-primary layui-btn-sm" id="newFolder"> <i class="layui-icon">&#xe7a0;</i>新建文件夹</button>
+        <div class="layui-btn-group">
+            <button class="layui-btn layui-btn-primary layui-btn-sm"><i class="layui-icon">&#xe61e;</i>下载</button>
+            <button class="layui-btn layui-btn-primary layui-btn-sm"><i class="layui-icon">&#xe64c;</i>分享</button>
+            <button class="layui-btn layui-btn-primary layui-btn-sm"><i class="layui-icon">&#xe640;</i>删除</button>
+            <button class="layui-btn layui-btn-primary layui-btn-sm">重命名</button>
+            <button class="layui-btn layui-btn-primary layui-btn-sm">复制到</button>
+            <button class="layui-btn layui-btn-primary layui-btn-sm">重命名</button>
+        </div>
+        <div class="search" >
+            <div class="layui-input-inline"><input type="text" class=" layui-input " placeholder="搜索您的文件" ></div>
+            <i class="layui-icon" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
+
+        </div>
+    </div>
+    <div class="filelist">
+        <span class="layui-breadcrumb">
+        <a href="">全部文件</a>
+        <a href="">我的资源</a>
+        <a href="">我的文件</a>
+        <a><cite>正文</cite></a>
+       </span>
+
+    </div>
+    <div class="fileshow">
+        <table class="layui-table"  id="file-table">
+            <thead>
+            <tr>
+                <th style="width: 600px">文件名</th>
+                <th style="width: 220px;" >大小</th>
+                <th >创建时间</th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+
+</div>
+<script>
+    $(function(){
+
+        var layer
+        layui.use('layer',function () {
+            layer = layui.layer
+        })
+
+        //新建文件夹
+        $('#newFolder').click(function(){
+            if ($('.btn-folder').length>0){
+                return
+            }
+            $('#file-table').prepend('<tr class="tr">\n' +
+                '                <td ><i class="layui-icon fileicon" >&#xe622;</i>\n' +
+                '                    <span>\n' +
+                '                        <input type="text" name="filename" id="inputfilename" value="新建文件夹">\n' +
+                '                        <span id="confirm" class="btn-folder"><i class="layui-icon">&#xe605;</i></span>\n' +
+                '                        <span id="cancel" class="btn-folder"><i class="layui-icon">&#x1006;</i></span>\n' +
+                '                    </span>\n' +
+                '                </td>\n' +
+                '                </td>\n' +
+                '                <td></td>\n' +
+                '                <td></td>\n' +
+                '            </tr>')
+        })
+        $('#file-table').delegate('#cancel','click',function(){
+            $(this).parent().parent().parent().remove()
+        })
+        $('#file-table').delegate('#confirm','click',function(){
+            var foldername = $('#inputfilename').val()
+            $.post('createFolder',{foldername:foldername,parentid:GetParam('path')},function (data) {
+                if (data.code==0){
+                    layer.msg('文件名已存在！')
+                    return
+                }
+                getData(GetParam('path'))
+            },'json');
+
+
+        })
+
+        //获取url参数
+        function GetParam (name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i")
+            var r = window.location.search.substr(1).match(reg)
+            if (r != null){
+                return decodeURI(r[2])
+            }else{
+                return 0
+            }
+        }
+
+        //获取文件列表
+        function getData(id) {
+            $('.tr').remove()
+
+            history.replaceState(GetParam('path'),null,location.pathname + '?path='+id)
+            $.get('showfile',{path:id},function (data) {
+               data.forEach(function (value, index) {
+                   $('#file-table').prepend(' <tr class="tr" id='+value.folderid+'>\n' +
+                       '                <td><i class="layui-icon fileicon">&#xe622;</i>'+value.foldername+'</td>\n' +
+                       '                <td></td>\n' +
+                       '                <td>'+value.createtime+'</td>\n' +
+                       '            </tr>')
+               })
+            },'json');
+        }
+
+        getData(GetParam('path'))
+
+
+        //监听历史回退
+        window.addEventListener('popstate', function (e) {
+            if(e.state){
+                console.log(e.state)
+                getData(e.state)
+            }
+        });
+
+        //点击上传按钮
+        $('#upload').click(function () {
+            $('#uploadfile').val('')
+            $('#uploadfile').click()
+        })
+
+        //上传文件
+        $('#uploadfile').change(function () {
+            if(!this.value){
+                return;
+            }
+            var formData = new FormData();
+            formData.append("file",this.files[0]);
+            $.ajax({
+                url : 'upload',
+                type : 'POST',
+                data : formData,
+                processData : false,
+                contentType : false,
+                // xhr: function(){
+                //     var xhr = $.ajaxSettings.xhr();
+                //     if(xhr.upload) {
+                //         xhr.upload.addEventListener("progress" , onprogress, false);
+                //         return xhr;
+                //     }
+                // },
+                // success : function(response) {
+                //     if(response=='fail'){
+                //         layer.msg('上传文件大小不能超过500M！');
+                //     }else{
+                //         layer.msg('上传成功')
+                //         $('#upload').click();
+                //     }
+                // }
+            });
+
+        })
+
+        //双击打开文件夹
+        $('#file-table').delegate('.tr','dblclick',function(){
+            getData(this.id)
+            history.pushState(GetParam('path'),null,location.pathname + '?path='+GetParam('path'))
+        })
+    })
+
+</script>
+</body>
+</html>
