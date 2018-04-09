@@ -49,9 +49,17 @@ class Index extends Controller
    }
 
     public function upload(){
+
         if ((@$_FILES["file"]["type"] == "image/gif") || (@$_FILES["file"]["type"] == "image/jpeg")
             || (@$_FILES["file"]["type"] == "imagepeg") || (@$_FILES["file"]["type"] == "image/png")
             &&(@$_FILES["file"]["size"] <500 * 1024 * 1024)){
+            $files['filetype']=1;
+            $files['filename']=@$_FILES["file"]["name"];
+            $files['filesize']=@$_FILES["file"]["size"];
+            $files['useId']=Session::get('uinfo')['userId'];
+            $files['folderid']=$_POST('parentid');
+            $files['createtime']=date(date('Y-m-d H:i:s'));
+            
             function createFolder($path){
                 if (!file_exists($path)) {
                     createFolder(dirname($path));
