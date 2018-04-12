@@ -15,13 +15,10 @@ class Index extends Controller
 
 
     }
-   public function  share(){
-       if(Session::get('uinfo')){
-           return   $this->fetch();
-       }
-       else return  $this->redirect('login/login');
+   public function  share(){                //分享功能
+
    }
-   public function createFolder(){
+   public function createFolder(){          //新建文件夹
 
        $add_data ['foldername']=$_POST['foldername'];
 
@@ -48,8 +45,7 @@ class Index extends Controller
 
    }
 
-
-    public function upload(){
+    public function upload(){           //上传文件
 
         if ((@$_FILES["file"]["type"] == "image/gif") || (@$_FILES["file"]["type"] == "image/jpeg")
             || (@$_FILES["file"]["type"] == "imagepeg") || (@$_FILES["file"]["type"] == "image/png")
@@ -70,23 +66,41 @@ class Index extends Controller
             createFolder("upload/");
             move_uploaded_file($_FILES["file"]["tmp_name"],"upload/i.jpg");
         }
-
-
     }
-    public function search(){
+    public function search(){       //查找功能
         $data=$_GET('search');
         $list1=db('folder')->where(['userId'=>Session::get('uinfo')['userId'],'filename'=>array('like',$data),'isrecovery'=>0])->select();
         $list2=db('files')->where(['userId'=>Session::get('uinfo')['userId'],'filename'=>array('like',$data),'isrecovery'=>0])->select();
         $list3=array_merge($list1,$list2);
         echo json_encode($list3);
-
     }
 
-    public function download(){
+    public function rename(){
+        $foldername=$_POST['foldername'];
+        $folderid=$_POST['folderid'];
+        $parenid=$_POST['parentid'];
+        $userId=Session::get('uinfo')['userId'];
+        $list=db('folder')->where(['userId'=>$userId,'parentid'=>$parenid,'foldername'=>$foldername])->select();
+        if($list==null){
+            db('folder')->where(['userId'=>$userId,'folderid'=>$folderid])->data(['foldername'=>$foldername])->update();
+             $this->success('重命名成功','index/index.html?path='.$parenid);
+        }
+        else $this->error('文件名已存在','index/index.html?path='.$parenid);
+    }
+
+    public function remove(){           //移动
+        $parentid=$_POST['parentid'];
+    }
+    public function delete(){           //删除
+
+        $id=$_POST['foldername'];
+
+    }
+    public function download(){         //下载
 
 
     }
-    public function showfile(){
+    public function showfile(){         //展示文件
         $path=$_GET['path'];
         $where['userId']=Session::get('uinfo')['userId'];
         $where['parentid']=$path;
