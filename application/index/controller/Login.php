@@ -7,7 +7,7 @@
  */
 namespace app\index\controller;
 use think\Controller;
-use \think\captcha\Captcha;
+use \think\Captcha;
 use \think\Session;
 
 class Login extends Controller{
@@ -74,4 +74,5 @@ class Login extends Controller{
         Session::delete('uinfo');
         $this->redirect('login/login');
     }
+
 }

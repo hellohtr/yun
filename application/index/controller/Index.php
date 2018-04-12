@@ -48,6 +48,7 @@ class Index extends Controller
 
    }
 
+
     public function upload(){
 
         if ((@$_FILES["file"]["type"] == "image/gif") || (@$_FILES["file"]["type"] == "image/jpeg")
@@ -72,45 +73,62 @@ class Index extends Controller
 
 
     }
+    public function search(){
+        $data=$_GET('search');
+        $list1=db('folder')->where(['userId'=>Session::get('uinfo')['userId'],'filename'=>array('like',$data),'isrecovery'=>0])->select();
+        $list2=db('files')->where(['userId'=>Session::get('uinfo')['userId'],'filename'=>array('like',$data),'isrecovery'=>0])->select();
+        $list3=array_merge($list1,$list2);
+        echo json_encode($list3);
+
+    }
+
     public function download(){
+
 
     }
     public function showfile(){
         $path=$_GET['path'];
         $where['userId']=Session::get('uinfo')['userId'];
         $where['parentid']=$path;
+        $where['isrecovery']=0;
         $list=db('folder')->where($where)->select();
         echo json_encode($list);
     }
-    public function Photos(){
+    public function Photos(){   // 查找图片类型的文件
         $where['userId']=Session::get('uinfo')['userId'];
         $where['filetype']=1;
         $list=db('files')->where($where)->select();
+        $where['isrecovery']=0;
         echo json_encode($list);
     }
-    public function Documnets(){
+    public function Documnets(){   //查找文档类型的文件
         $where['userId']=Session::get('uinfo')['userId'];
         $where['filetype']=2;
         $list=db('files')->where($where)->select();
         echo json_encode($list);
     }
-    public function Music(){
+    public function Music(){     //查找音乐类型的文件
         $where['userId']=Session::get('uinfo')['userId'];
         $where['filetype']=3;
         $list=db('files')->where($where)->select();
         echo json_encode($list);
     }
-    public function Video(){
+    public function Video(){     //查找视频类型的文件
         $where['userId']=Session::get('uinfo')['userId'];
         $where['filetype']=4;
         $list=db('files')->where($where)->select();
         echo json_encode($list);
     }
-    public function Others(){
+    public function Others(){       //查找其他类型的文件
         $where['userId']=Session::get('uinfo')['userId'];
         $where['filetype']=5;
         $list=db('files')->where($where)->select();
         echo json_encode($list);
+    }
+    public function recycleBin(){     //回收站
+        $list1=db('folder')->where(['userId'=>Session::get('uinfo')['userId'],'isrecovery'=>1])->select();
+
+
     }
 }
 
