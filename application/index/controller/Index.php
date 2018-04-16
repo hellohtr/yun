@@ -69,8 +69,8 @@ class Index extends Controller
     }
     public function search(){       //查找功能
         $data=$_GET('search');
-        $list1=db('folder')->where(['userId'=>Session::get('uinfo')['userId'],'filename'=>array('like',$data),'isrecovery'=>0])->select();
-        $list2=db('files')->where(['userId'=>Session::get('uinfo')['userId'],'filename'=>array('like',$data),'isrecovery'=>0])->select();
+        $list1=db('folder')->where(['userId'=>Session::get('uinfo')['userId'],'filename'=>array('like',$data),'is_recycle'=>0])->select();
+        $list2=db('files')->where(['userId'=>Session::get('uinfo')['userId'],'filename'=>array('like',$data),'is_recycle'=>0])->select();
         $list3=array_merge($list1,$list2);
         echo json_encode($list3);
     }
@@ -80,7 +80,7 @@ class Index extends Controller
         $folderid=$_POST['folderid'];
         $parenid=$_POST['parentid'];
         $userId=Session::get('uinfo')['userId'];
-        $list=db('folder')->where(['userId'=>$userId,'parentid'=>$parenid,'foldername'=>$foldername])->select();
+        $list=db('folder')->where(['userId'=>$userId,'parentid'=>$parenid,'foldername'=>$foldername,'is_recycle'=>0])->select();
         if($list==null){
             db('folder')->where(['userId'=>$userId,'folderid'=>$folderid])->data(['foldername'=>$foldername])->update();
              $this->success('重命名成功','index/index.html?path='.$parenid);
@@ -104,43 +104,48 @@ class Index extends Controller
         $path=$_GET['path'];
         $where['userId']=Session::get('uinfo')['userId'];
         $where['parentid']=$path;
-        $where['isrecovery']=0;
+        $where['is_recycle']=0;
         $list=db('folder')->where($where)->select();
         echo json_encode($list);
     }
     public function Photos(){   // 查找图片类型的文件
         $where['userId']=Session::get('uinfo')['userId'];
         $where['filetype']=1;
+        $where['is_recycle']=0;
         $list=db('files')->where($where)->select();
-        $where['isrecovery']=0;
+
         echo json_encode($list);
     }
     public function Documnets(){   //查找文档类型的文件
         $where['userId']=Session::get('uinfo')['userId'];
         $where['filetype']=2;
+        $where['is_recycle']=0;
         $list=db('files')->where($where)->select();
         echo json_encode($list);
     }
     public function Music(){     //查找音乐类型的文件
         $where['userId']=Session::get('uinfo')['userId'];
         $where['filetype']=3;
+        $where['is_recycle']=0;
         $list=db('files')->where($where)->select();
         echo json_encode($list);
     }
     public function Video(){     //查找视频类型的文件
         $where['userId']=Session::get('uinfo')['userId'];
         $where['filetype']=4;
+        $where['is_recycle']=0;
         $list=db('files')->where($where)->select();
         echo json_encode($list);
     }
     public function Others(){       //查找其他类型的文件
         $where['userId']=Session::get('uinfo')['userId'];
         $where['filetype']=5;
+        $where['is_recycle']=0;
         $list=db('files')->where($where)->select();
         echo json_encode($list);
     }
     public function recycleBin(){     //回收站
-        $list1=db('folder')->where(['userId'=>Session::get('uinfo')['userId'],'isrecovery'=>1])->select();
+        $list1=db('folder')->where(['userId'=>Session::get('uinfo')['userId'],'is_recycle'=>1])->select();
 
 
     }
