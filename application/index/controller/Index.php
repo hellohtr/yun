@@ -48,14 +48,10 @@ class Index extends Controller
     public function upload(){           //上传文件
 
         if ((@$_FILES["file"]["type"] == "image/gif") || (@$_FILES["file"]["type"] == "image/jpeg")
-            || (@$_FILES["file"]["type"] == "imagepeg") || (@$_FILES["file"]["type"] == "image/png")
+            || (@$_FILES["file"]["type"] == "image/peg") || (@$_FILES["file"]["type"] == "image/png")
             &&(@$_FILES["file"]["size"] <500 * 1024 * 1024)){
             $files['filetype']=1;
-            $files['filename']=@$_FILES["file"]["name"];
-            $files['filesize']=@$_FILES["file"]["size"];
-            $files['useId']=Session::get('uinfo')['userId'];
-            $files['folderid']=$_POST('parentid');
-            $files['createtime']=date(date('Y-m-d H:i:s'));
+
             
             function createFolder($path){
                 if (!file_exists($path)) {
@@ -63,9 +59,37 @@ class Index extends Controller
                     mkdir($path, 0777);
                 }
             }
+
             createFolder("upload/");
             move_uploaded_file($_FILES["file"]["tmp_name"],"upload/i.jpg");
         }
+        elseif((@$_FILES["file"]["type"] == "video/mpeg") || (@$_FILES["file"]["type"] == "video/quicktime")
+            || (@$_FILES["file"]["type"] == "video/x-la-asf") || (@$_FILES["file"]["type"] == "video/x-ms-asf")
+            || (@$_FILES["file"]["type"] == "video/x-msvideo")||(@$_FILES["file"]["type"] == "video/x-sgi-movie")
+            &&(@$_FILES["file"]["size"] <500 * 1024 * 1024)){
+            $files['filetype']=4;
+        }
+        elseif((@$_FILES["file"]["type"] == "text/plain") || (@$_FILES["file"]["type"] == "application/msword")
+            || (@$_FILES["file"]["type"] == "application/vnd.ms-powerpoint") || (@$_FILES["file"]["type"] == "application/vnd.ms-excel")
+            || (@$_FILES["file"]["type"] == "x-world/x-vrml")|| (@$_FILES["file"]["type"] == "text/html")
+            &&(@$_FILES["file"]["size"] <500 * 1024 * 1024)){
+            $files['filetype']=2;
+        }
+        elseif ((@$_FILES["file"]["type"] == "audio/mpeg") || (@$_FILES["file"]["type"] == "audio/x-aiff")
+            || (@$_FILES["file"]["type"] == "audio/x-wav") || (@$_FILES["file"]["type"] == "audio/x-pn-realaudio")
+            &&(@$_FILES["file"]["size"] <500 * 1024 * 1024)){
+            $files['filetype']=3;
+        }
+        else{
+            $files['filetype']=5;
+        }
+
+
+        $files['filename']=@$_FILES["file"]["name"];
+        $files['filesize']=@$_FILES["file"]["size"];
+        $files['useId']=Session::get('uinfo')['userId'];
+        $files['folderid']=$_POST('parentid');
+        $files['createtime']=date(date('Y-m-d H:i:s'));
     }
     public function search(){       //查找功能
         $data=$_GET('search');
