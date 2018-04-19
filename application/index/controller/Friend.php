@@ -28,9 +28,17 @@ class Friend extends Controller{
         }
     }
     public function deleteFriend(){
-        
+        $userId1=$_GET('friendid');
+        db('friend')->where(['userId1'=>Session::get('uinfo')['userId'],'userId2'=>$userId1])->whereOr(['userId1'=>$userId1,'userId2'=>Session::get('uinfo')['userId']])->delete();
+
     }
     public function sendMessage(){
+        $add_data['content']=$_POST('concent');
+        $add_data['sender']=Session::get('uinfo')['userId'];
+        $add_data['accepter']=$_POST('friend');
+        $add_data['createtime']=date(date('Y-m-d H:i:s'));
+        db('message')->insert($add_data);
+
 
     }
     public function loadMessage(){
