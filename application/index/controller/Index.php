@@ -44,51 +44,66 @@ class Index extends Controller
 
    }
 
-    public function upload(){           //上传文件
+    public function upload(){
         $files['filename']=@$_FILES["file"]["name"];
         $files['filesize']=@$_FILES["file"]["size"];
-        $files['useId']=Session::get('uinfo')['userId'];
-        $files['folderid']=$_POST('parentid');
+        $files['userId']=Session::get('uinfo')['userId'];
+        $files['folderid']=$_POST['parentid'];
         $files['createtime']=date(date('Y-m-d H:i:s'));
+        $datetime=strtotime($files['createtime']);
+        $temp=explode('.',$files['filename']);
+        $type=strtolower($temp[sizeof($temp)-1]);
+
         function createFolder($path){
             if (!file_exists($path)) {
                 createFolder(dirname($path));
                 mkdir($path, 0777);
             }
         }
-        if ((@$_FILES["file"]["type"] == "image/gif") || (@$_FILES["file"]["type"] == "image/jpeg")
-            || (@$_FILES["file"]["type"] == "image/peg") || (@$_FILES["file"]["type"] == "image/png")
+        echo @$_FILES["file"]["type"];
+        if (preg_match('/(png|jpg|gif|bmp|jpeg)/',$type)
             &&(@$_FILES["file"]["size"] <500 * 1024 * 1024)){
             $files['filetype']=1;
             createFolder("upload/".$files['userId']."/image/");
-            move_uploaded_file($_FILES["file"]["tmp_name"],"upload/i.jpg");
+            move_uploaded_file($_FILES["file"]["tmp_name"],"upload/{$files['userId']}/image/".$datetime.'.'.$type);
+            $files['filepath']="upload/{$files['userId']}/image/".$datetime.'.'.$type;
+            db('files')->insert($files);
         }
-        elseif((@$_FILES["file"]["type"] == "video/mpeg") || (@$_FILES["file"]["type"] == "video/quicktime")            //判断是视频类型
-            || (@$_FILES["file"]["type"] == "video/x-la-asf") || (@$_FILES["file"]["type"] == "video/x-ms-asf")
-            || (@$_FILES["file"]["type"] == "video/x-msvideo")||(@$_FILES["file"]["type"] == "video/x-sgi-movie")
+        elseif(preg_match('/(avi|mp4|mov|mpeg|mpg|ram|qt)/',$type)
             &&(@$_FILES["file"]["size"] <500 * 1024 * 1024)){
             $files['filetype']=4;
             createFolder("upload/".$files['userId']."/video/");
+            move_uploaded_file($_FILES["file"]["tmp_name"],"upload/{$files['userId']}/video/".$datetime.'.'.$type);
+            $files['filepath']="upload/{$files['userId']}/video/".$datetime.'.'.$type;
+            db('files')->insert($files);
         }
-        elseif((@$_FILES["file"]["type"] == "text/plain") || (@$_FILES["file"]["type"] == "application/msword")         //判断是文档类型
-            || (@$_FILES["file"]["type"] == "application/vnd.ms-powerpoint") || (@$_FILES["file"]["type"] == "application/vnd.ms-excel")
-            || (@$_FILES["file"]["type"] == "x-world/x-vrml")|| (@$_FILES["file"]["type"] == "text/html")
+        elseif(preg_match('/(doc|docx|txt|xls|pdf|ppt)/',$type)
             &&(@$_FILES["file"]["size"] <500 * 1024 * 1024)){
             $files['filetype']=2;
+            $datetime=strtotime($files['createtime']);
             createFolder("upload/".$files['userId']."/document/");
+            move_uploaded_file($_FILES["file"]["tmp_name"],"upload/{$files['userId']}/document/".$datetime.'.'.$type);
+            $files['filepath']="upload/{$files['userId']}/document/".$datetime.'.'.$type;
+            db('files')->insert($files);
         }
-        elseif ((@$_FILES["file"]["type"] == "audio/mpeg") || (@$_FILES["file"]["type"] == "audio/x-aiff")              //判断是音乐类型
-            || (@$_FILES["file"]["type"] == "audio/x-wav") || (@$_FILES["file"]["type"] == "audio/x-pn-realaudio")
+        elseif (preg_match('/(mp3|asf|asp|au|mid|wav|asx)/',$type)
             &&(@$_FILES["file"]["size"] <500 * 1024 * 1024)){
             $files['filetype']=3;
+            $datetime=strtotime($files['createtime']);
             createFolder("upload/".$files['userId']."/music/");
-            $files['path']="";
+            move_uploaded_file($_FILES["file"]["tmp_name"],"upload/{$files['userId']}/music/".$datetime.'.'.$type[1]);
+            $files['filepath']="upload/{$files['userId']}/music/".$datetime.'.'.$type;
+            db('files')->insert($files);
         }
         else{
             $files['filetype']=5;
+            $datetime=strtotime($files['createtime']);
             createFolder("upload/".$files['userId']."/other/");
+            move_uploaded_file($_FILES["file"]["tmp_name"],"upload/{$files['userId']}/other/".$datetime.'.'.$type);
+            $files['filepath']="upload/{$files['userId']}/other/".$datetime.'.'.$type;
+            db('files')->insert($files);
         }
-        db('files')->insert($files);
+
 
 
     }
@@ -156,51 +171,32 @@ class Index extends Controller
 
 
     }
-    public function showfile(){         //展示文件
+    public function showfolder(){         //展示文件
         $path=$_GET['path'];
         $where['userId']=Session::get('uinfo')['userId'];
         $where['parentid']=$path;
         $where['is_recycle']=0;
         $listfloder=db('folder')->where($where)->select();
-        echo json_encode($listfloder);
-        $listfile=db('files')->where($where)->select();
-    }
-    public function Photos(){   // 查找图片类型的文件
-        $where['userId']=Session::get('uinfo')['userId'];
-        $where['filetype']=1;
-        $where['is_recycle']=0;
-        $list=db('files')->where($where)->select();
 
-        echo json_encode($list);
+        echo json_encode($listfloder);
+
     }
-    public function Documnets(){   //查找文档类型的文件
+    public function showfile(){
+        $path=$_GET['path'];
         $where['userId']=Session::get('uinfo')['userId'];
-        $where['filetype']=2;
+        $where['folderid']=$path;
         $where['is_recycle']=0;
-        $list=db('files')->where($where)->select();
-        echo json_encode($list);
+        $listfile=db('files')->where($where)->select();
+        echo json_encode($listfile);
     }
-    public function Music(){     //查找音乐类型的文件
+    public function showtype(){
+        $where['filetype']=$_GET['type'];
         $where['userId']=Session::get('uinfo')['userId'];
-        $where['filetype']=3;
         $where['is_recycle']=0;
-        $list=db('files')->where($where)->select();
-        echo json_encode($list);
+        $show=db('files')->where($where)->select();
+        echo json_encode($show);
     }
-    public function Video(){     //查找视频类型的文件
-        $where['userId']=Session::get('uinfo')['userId'];
-        $where['filetype']=4;
-        $where['is_recycle']=0;
-        $list=db('files')->where($where)->select();
-        echo json_encode($list);
-    }
-    public function Others(){       //查找其他类型的文件
-        $where['userId']=Session::get('uinfo')['userId'];
-        $where['filetype']=5;
-        $where['is_recycle']=0;
-        $list=db('files')->where($where)->select();
-        echo json_encode($list);
-    }
+
     public function recycleBin(){     //回收站
 
 

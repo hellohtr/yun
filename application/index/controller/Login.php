@@ -7,7 +7,7 @@
  */
 namespace app\index\controller;
 use think\Controller;
-use \think\Captcha;
+use \think\captcha\Captcha;
 use \think\Session;
 
 class Login extends Controller{
