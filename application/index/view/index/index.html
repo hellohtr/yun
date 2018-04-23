@@ -4,11 +4,11 @@
 
 
     <li class="layui-nav-item menu-active"><a href="javascript:;">全部文件</a></li>
-    <li class="layui-nav-item"><a href="javascript:;">图片</a></li>
-    <li class="layui-nav-item"><a href="javascript:;">文档</a></li>
-    <li class="layui-nav-item"><a href="javascript:;">音乐</a></li>
-    <li class="layui-nav-item"><a href="javascript:;">视频</a></li>
-    <li class="layui-nav-item"><a href="javascript:;">其他</a></li>
+    <li class="layui-nav-item type-image"><a href="javascript:;">图片</a></li>
+    <li class="layui-nav-item type-document"><a href="javascript:;">文档</a></li>
+    <li class="layui-nav-item type-music"><a href="javascript:;">音乐</a></li>
+    <li class="layui-nav-item type-video"><a href="javascript:;">视频</a></li>
+    <li class="layui-nav-item type-other"><a href="javascript:;">其他</a></li>
     <li class="layui-nav-item"><a href="javascript:;">我的分享</a></li>
     <li class="layui-nav-item"><a href="javascript:;">回收站</a></li>
 </ul>
@@ -139,7 +139,21 @@
                 },'json');
             }
 
-        }
+        $('.type-document').click(function () {
+            getTypeData(2)
+        })
+        $('.type-image').click(function () {
+            getTypeData(1)
+        })
+        $('.type-music').click(function () {
+            getTypeData(3)
+        })
+        $('.type-video').click(function () {
+            getTypeData(4)
+        })
+        $('.type-other').click(function () {
+            getTypeData(5)
+        })
 
 
         //监听历史回退
