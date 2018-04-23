@@ -36,10 +36,9 @@
     </div>
     <div class="filelist">
         <span class="layui-breadcrumb">
-        <a href="">全部文件</a>
-        <a href="">我的资源</a>
-        <a href="">我的文件</a>
-        <a><cite>正文</cite></a>
+            <a href="{:url('index/index?path=0')}">全部文件</a>
+
+            <a><cite>正文</cite></a>
        </span>
 
     </div>
@@ -127,6 +126,20 @@
         }
 
         getData(GetParam('path'))
+        function getTypeData(type) {
+            $('.tr').remove()
+                $.get('showTypeData',{type:type},function (data){
+                    data.forEach(function (value,index) {
+                        $('#file-table').prepend(' <tr class="tr" id='+value.folderid+'>\n' +
+                            '                <td><i class="layui-icon fileicon">&#xe622;</i>'+value.foldername+'</td>\n' +
+                            '                <td></td>\n' +
+                            '                <td>'+value.createtime+'</td>\n' +
+                            '            </tr>')
+                    })
+                },'json');
+            }
+
+        }
 
 
         //监听历史回退

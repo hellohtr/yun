@@ -157,49 +157,19 @@ class Index extends Controller
 
     }
     public function showfile(){         //展示文件
-        $path=$_GET['path'];
+        $where['parentid']=$_GET['path'];
         $where['userId']=Session::get('uinfo')['userId'];
-        $where['parentid']=$path;
         $where['is_recycle']=0;
         $listfloder=db('folder')->where($where)->select();
         echo json_encode($listfloder);
         $listfile=db('files')->where($where)->select();
     }
-    public function Photos(){   // 查找图片类型的文件
+    public function showtype(){
+        $where['filetype']=$_GET['type'];
         $where['userId']=Session::get('uinfo')['userId'];
-        $where['filetype']=1;
         $where['is_recycle']=0;
-        $list=db('files')->where($where)->select();
-
-        echo json_encode($list);
-    }
-    public function Documnets(){   //查找文档类型的文件
-        $where['userId']=Session::get('uinfo')['userId'];
-        $where['filetype']=2;
-        $where['is_recycle']=0;
-        $list=db('files')->where($where)->select();
-        echo json_encode($list);
-    }
-    public function Music(){     //查找音乐类型的文件
-        $where['userId']=Session::get('uinfo')['userId'];
-        $where['filetype']=3;
-        $where['is_recycle']=0;
-        $list=db('files')->where($where)->select();
-        echo json_encode($list);
-    }
-    public function Video(){     //查找视频类型的文件
-        $where['userId']=Session::get('uinfo')['userId'];
-        $where['filetype']=4;
-        $where['is_recycle']=0;
-        $list=db('files')->where($where)->select();
-        echo json_encode($list);
-    }
-    public function Others(){       //查找其他类型的文件
-        $where['userId']=Session::get('uinfo')['userId'];
-        $where['filetype']=5;
-        $where['is_recycle']=0;
-        $list=db('files')->where($where)->select();
-        echo json_encode($list);
+        $show=db('files')->where($where)->select();
+        echo json_encode($show);
     }
     public function recycleBin(){     //回收站
 
