@@ -176,10 +176,18 @@
         function getTypeData(type) {
             $('.tr').remove()
             $.get('showTypeData',{type:type},function (data){
-                data.forEach(function (value,index) {
-                    $('#file-table').prepend(' <tr class="tr" id='+value.folderid+'>\n' +
-                        '                <td><i class="layui-icon fileicon">&#xe622;</i>'+value.foldername+'</td>\n' +
-                        '                <td></td>\n' +
+                data.forEach(function (value, index) {
+                    switch (value.filetype){
+                        case 1:var icon = '<div class="icons icons-image"></div>';break;
+                        case 2:var icon = '<div class="icons icons-documnet"></div>';break;
+                        case 3:var icon = '<div class="icons icons-music"></div>';break;
+                        case 4:var icon = '<div class="icons icons-video"></div>';break;
+                        case 5:var icon = '<div class="icons icons-other"></div>';break;
+                    }
+
+                    $('#file-table').append(' <tr class="tr" id='+value.folderid+'>\n' +
+                        '                <td>'+ icon +value.filename+'</td>\n' +
+                        '                <td>'+value.filesize+'</td>\n' +
                         '                <td>'+value.createtime+'</td>\n' +
                         '            </tr>')
                 })
