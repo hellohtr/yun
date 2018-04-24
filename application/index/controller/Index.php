@@ -198,6 +198,9 @@ class Index extends Controller
     }
 
     public function recycleBin(){     //回收站
+        $userId=Session::get('uinfo')['userId'];
+        $listbin=db('bin')->where('userId',$userId)->select();
+        echo json_encode($listbin);
 
 
 
