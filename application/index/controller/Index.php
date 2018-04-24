@@ -3,8 +3,6 @@ namespace app\index\controller;
 use think\Controller;
 use think\Env;
 use think\Session;
-
-
 class Index extends Controller
 {
     public function index()
@@ -14,11 +12,19 @@ class Index extends Controller
           return   $this->fetch();
         }
         else return  $this->redirect('login/login');
-
+    }
+    public function share(){
+        $add_data['userId']=Session::get('uinfo')['userId'];
+        $add_data['createtime']=date(date("Y-m-d H:i:s"));
+        $add_data['type']=$_GET['type'];
+        $add_data['shareid']=$_GET['id'];
+        db('share')->insert($add_data);
 
     }
-   public function  share(){                //分享功能
-
+   public function  showShare(){            //分享功能
+       $userId=Session::get('uinfo')['userId'];
+       $sharelist=db('share')->where('userId',$userId)->select();
+       json_encode($sharelist);
    }
    public function createFolder(){          //新建文件夹
 
@@ -41,10 +47,8 @@ class Index extends Controller
                 $this->error('文件名已存在');
            }
        }
-
    }
-
-    public function upload(){
+    public function upload(){               //上传功能
         $files['filename']=@$_FILES["file"]["name"];
         $files['filesize']=@$_FILES["file"]["size"];
         $files['userId']=Session::get('uinfo')['userId'];
@@ -53,7 +57,6 @@ class Index extends Controller
         $datetime=strtotime($files['createtime']);
         $temp=explode('.',$files['filename']);
         $type=strtolower($temp[sizeof($temp)-1]);
-
         function createFolder($path){
             if (!file_exists($path)) {
                 createFolder(dirname($path));
@@ -61,89 +64,93 @@ class Index extends Controller
             }
         }
         echo @$_FILES["file"]["type"];
-        if (preg_match('/(png|jpg|gif|bmp|jpeg)/',$type)
-            &&(@$_FILES["file"]["size"] <500 * 1024 * 1024)){
-            $files['filetype']=1;
-            createFolder("upload/".$files['userId']."/image/");
-            move_uploaded_file($_FILES["file"]["tmp_name"],"upload/{$files['userId']}/image/".$datetime.'.'.$type);
-            $files['filepath']="upload/{$files['userId']}/image/".$datetime.'.'.$type;
-            db('files')->insert($files);
+        if(@$_FILES["file"]["size"] >500 * 1024 * 1024){
+            $this->error('上传文件超过500M');
         }
-        elseif(preg_match('/(avi|mp4|mov|mpeg|mpg|ram|qt)/',$type)
-            &&(@$_FILES["file"]["size"] <500 * 1024 * 1024)){
-            $files['filetype']=4;
-            createFolder("upload/".$files['userId']."/video/");
-            move_uploaded_file($_FILES["file"]["tmp_name"],"upload/{$files['userId']}/video/".$datetime.'.'.$type);
-            $files['filepath']="upload/{$files['userId']}/video/".$datetime.'.'.$type;
-            db('files')->insert($files);
+        else {
+            if (preg_match('/(png|jpg|gif|bmp|jpeg)/', $type)) {
+                $files['filetype'] = 1;
+                createFolder("upload/" . $files['userId'] . "/image/");
+                move_uploaded_file($_FILES["file"]["tmp_name"], "upload/{$files['userId']}/image/" . $datetime . '.' . $type);
+                $files['filepath'] = "upload/{$files['userId']}/image/" . $datetime . '.' . $type;
+                db('files')->insert($files);
+            } elseif (preg_match('/(avi|mp4|mov|mpeg|mpg|ram|qt)/', $type)) {
+                $files['filetype'] = 4;
+                createFolder("upload/" . $files['userId'] . "/video/");
+                move_uploaded_file($_FILES["file"]["tmp_name"], "upload/{$files['userId']}/video/" . $datetime . '.' . $type);
+                $files['filepath'] = "upload/{$files['userId']}/video/" . $datetime . '.' . $type;
+                db('files')->insert($files);
+            } elseif (preg_match('/(doc|docx|txt|xls|pdf|ppt)/', $type)) {
+                $files['filetype'] = 2;
+                $datetime = strtotime($files['createtime']);
+                createFolder("upload/" . $files['userId'] . "/document/");
+                move_uploaded_file($_FILES["file"]["tmp_name"], "upload/{$files['userId']}/document/" . $datetime . '.' . $type);
+                $files['filepath'] = "upload/{$files['userId']}/document/" . $datetime . '.' . $type;
+                db('files')->insert($files);
+            } elseif (preg_match('/(mp3|asf|asp|au|mid|wav|asx)/', $type)) {
+                $files['filetype'] = 3;
+                $datetime = strtotime($files['createtime']);
+                createFolder("upload/" . $files['userId'] . "/music/");
+                move_uploaded_file($_FILES["file"]["tmp_name"], "upload/{$files['userId']}/music/" . $datetime . '.' . $type[1]);
+                $files['filepath'] = "upload/{$files['userId']}/music/" . $datetime . '.' . $type;
+                db('files')->insert($files);
+            } else {
+                $files['filetype'] = 5;
+                $datetime = strtotime($files['createtime']);
+                createFolder("upload/" . $files['userId'] . "/other/");
+                move_uploaded_file($_FILES["file"]["tmp_name"], "upload/{$files['userId']}/other/" . $datetime . '.' . $type);
+                $files['filepath'] = "upload/{$files['userId']}/other/" . $datetime . '.' . $type;
+                db('files')->insert($files);
+            }
         }
-        elseif(preg_match('/(doc|docx|txt|xls|pdf|ppt)/',$type)
-            &&(@$_FILES["file"]["size"] <500 * 1024 * 1024)){
-            $files['filetype']=2;
-            $datetime=strtotime($files['createtime']);
-            createFolder("upload/".$files['userId']."/document/");
-            move_uploaded_file($_FILES["file"]["tmp_name"],"upload/{$files['userId']}/document/".$datetime.'.'.$type);
-            $files['filepath']="upload/{$files['userId']}/document/".$datetime.'.'.$type;
-            db('files')->insert($files);
-        }
-        elseif (preg_match('/(mp3|asf|asp|au|mid|wav|asx)/',$type)
-            &&(@$_FILES["file"]["size"] <500 * 1024 * 1024)){
-            $files['filetype']=3;
-            $datetime=strtotime($files['createtime']);
-            createFolder("upload/".$files['userId']."/music/");
-            move_uploaded_file($_FILES["file"]["tmp_name"],"upload/{$files['userId']}/music/".$datetime.'.'.$type[1]);
-            $files['filepath']="upload/{$files['userId']}/music/".$datetime.'.'.$type;
-            db('files')->insert($files);
+    }
+    public function search(){//查找功能
+        $data=$_GET('search');
+        $list2=db('files')->where(['userId'=>Session::get('uinfo')['userId'],'filename'=>array('like',$data),'is_recycle'=>0])->select();
+        echo json_encode($list2);
+    }
+
+    public function rename(){       //重命名
+        $type=$_POST['type'];
+        $name=$_POST['name'];
+        $id=$_POST['id'];
+        $parentid=$_POST['parentid'];
+        $userId=Session::get('uinfo')['userId'];
+        if($type==0){
+            $list=db('folder')->where(['userId'=>$userId,'parentid'=>$parentid,'foldername'=>$name,'is_recycle'=>0])->select();
+            if($list==null){
+                db('folder')->where(['userId'=>$userId,'folderid'=>$id])->data(['foldername'=>$name])->update();
+                $this->success('重命名成功','index/index.html?path='.$parentid);
+            }
+            else $this->error('文件名已存在','index/index.html?path='.$parentid);
         }
         else{
-            $files['filetype']=5;
-            $datetime=strtotime($files['createtime']);
-            createFolder("upload/".$files['userId']."/other/");
-            move_uploaded_file($_FILES["file"]["tmp_name"],"upload/{$files['userId']}/other/".$datetime.'.'.$type);
-            $files['filepath']="upload/{$files['userId']}/other/".$datetime.'.'.$type;
-            db('files')->insert($files);
+            db('files')->where(['userId'=>$userId,'fileid'=>$id])->data(['filename'=>$name])->update();
         }
 
 
 
-    }
-    public function search(){       //查找功能
-        $data=$_GET('search');
-        $list1=db('folder')->where(['userId'=>Session::get('uinfo')['userId'],'filename'=>array('like',$data),'is_recycle'=>0])->select();
-        $list2=db('files')->where(['userId'=>Session::get('uinfo')['userId'],'filename'=>array('like',$data),'is_recycle'=>0])->select();
-        $list3=array_merge($list1,$list2);
-        echo json_encode($list3);
-    }
-
-    public function rename(){
-        $foldername=$_POST['foldername'];
-        $folderid=$_POST['folderid'];
-        $parenid=$_POST['parentid'];
-        $userId=Session::get('uinfo')['userId'];
-        $list=db('folder')->where(['userId'=>$userId,'parentid'=>$parenid,'foldername'=>$foldername,'is_recycle'=>0])->select();
-        if($list==null){
-            db('folder')->where(['userId'=>$userId,'folderid'=>$folderid])->data(['foldername'=>$foldername])->update();
-             $this->success('重命名成功','index/index.html?path='.$parenid);
-        }
-        else $this->error('文件名已存在','index/index.html?path='.$parenid);
     }
 
     public function remove(){           //移动
-        $parentid=$_POST['parentid'];
-        $folderid=$_POST['folderid'];
         $type=$_POST['type'];
-        if($type=='file'){
-            db('files')->where('fileid',$folderid)->update('folderid',$parentid);
+        $id=$_POST['id'];
+        $parentid=$_POST['parentid'];
+        $userId=Session::get('uinfo')['userId'];
+        if($type==0){
+            db('folder')->where(['userId'=>$userId,'folderid'=>$id])->data(['parentid'=>$parentid])->update();
+            $this->success('移动成功','index/index.html?path='.$parentid);
         }
         else{
-            db('folder')->where('folderid',$folderid)->update('parentid',$parentid);
+            db('files')->where(['userId'=>$userId,'fileid'=>$id])->data(['parentid'=>$parentid])->update();
+            $this->success('移动成功','index/index.html?path='.$parentid);
         }
     }
-    public function delete(){           //删除
+    public function Delete(){           //删除
         $add_data['createtime']=date(date('Y-m-d H:i:s'));
         $add_data['fid']=$_POST['id'];
         $add_data['type']=$_POST['type'];
-        if($_POST['type']=='file'){
+        if($_POST['type']=='1'){
             $fileid=$_POST['id'];
             db('files')->where('fileid',$fileid)->update('is_recycle',1);
             db('bin')->insert($add_data);
@@ -151,10 +158,10 @@ class Index extends Controller
         else{
             $folderid=$_POST['id'];
             db('folder')->where('folderid',$folderid)->update('is_recycle',1);
+            db('folder')->where('parentid',$folderid)->update('is_recycle',1);
+            db('files')->where('folderid',$folderid)->update('is_recycle',1);
             db('bin')->insert($add_data);
         }
-
-
     }
     public function download(){ //下载
         $fileid=$_GET('fileid');
@@ -167,21 +174,17 @@ class Index extends Controller
         header("Content-Disposition:attachment;filename=".$basename['basename']);
         header("Content-Length:".$list['filesize']);
         readfile($filename);
-
-
-
     }
-    public function showfolder(){         //展示文件
+    public function showfolder(){         //展示文件夹
         $path=$_GET['path'];
         $where['userId']=Session::get('uinfo')['userId'];
         $where['parentid']=$path;
         $where['is_recycle']=0;
         $listfloder=db('folder')->where($where)->select();
-
         echo json_encode($listfloder);
 
     }
-    public function showfile(){
+    public function showfile(){     //展示文件
         $path=$_GET['path'];
         $where['userId']=Session::get('uinfo')['userId'];
         $where['folderid']=$path;
@@ -189,7 +192,7 @@ class Index extends Controller
         $listfile=db('files')->where($where)->select();
         echo json_encode($listfile);
     }
-    public function showtype(){
+    public function showtype(){     //展示分类文件
         $where['filetype']=$_GET['type'];
         $where['userId']=Session::get('uinfo')['userId'];
         $where['is_recycle']=0;
@@ -201,8 +204,27 @@ class Index extends Controller
         $userId=Session::get('uinfo')['userId'];
         $listbin=db('bin')->where('userId',$userId)->select();
         echo json_encode($listbin);
+    }
+    public function restore(){   //从回收站还原信息
+        $id=$_POST['id'];
+        $type=$_POST['type'];
+        $userId=Session::get('uinfo')['userId'];
+        if($type==0){
+            db('folder')->where(['userId'=>$userId,'folderid'=>'id'])->update(['is_recycle'=>0]);
+            db('files')->where(['userId'=>$userId,'folderid'=>'id'])->update(['is_recycle'=>0]);
+            db('folder')->where(['userId'=>$userId,'parentid'=>'id'])->update(['is_recycle'=>0]);
+        }
+        else{
+            db('fileid')->where(['userId'=>$userId,'fileid'=>'id'])->update(['is_recycle'=>0]);
+        }
+        db('bin')->where(['userId'=>$userId,'type'=>$type,'bid'=>$id])->delete();
+    }
 
-
+    public function deleteAll(){   //清空回收站
+        $userId=Session::get('uinfo')['userId'];
+        db('bin')->where('userId',$userId)->delete();
+        db('files')->where(['userId'=>$userId,'is_recycle'=>1])->delete();
+        db('folder')->where(['userId'=>$userId,'is_recycle'=>1])->delete();
 
     }
 }
