@@ -227,6 +227,24 @@ class Index extends Controller
         db('folder')->where(['userId'=>$userId,'is_recycle'=>1])->delete();
 
     }
+    public function Copy(){
+        $userId=Session::get('uinfo')['userId'];
+        $id=$_POST['id'];
+        $parentid=$_POST['parentid'];
+        $type=$_POST['type'];
+        if($type==0){
+
+        }
+        else{
+            $add_data=db('files')->where('fileid',$id)->select();
+            unset($add_data['fileid']);
+            unset($add_data['folderid']);
+            unset($add_data['createtime']);
+            $add_data['folderid']=$parentid;
+            $add_data['createtime']=date(date('Y-m-d H:i:s'));
+            db('files')->insert($add_data);
+        }
+    }
 }
 
 
