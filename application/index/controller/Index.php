@@ -38,7 +38,7 @@ class Index extends Controller
            $add_data['userId']=Session::get('uinfo')['userId'];
 
            $add_data['createtime'] = date(date('Y-m-d H:i:s'));
-           $list=db('folder')->where(['userId'=>$add_data['userId'],'parentid'=>$add_data['parentid'],'foldername'=>$add_data['foldername']])->find();
+           $list=db('folder')->where(['userId'=>$add_data['userId'],'parentid'=>$add_data['parentid'],'is_recycle'=>0,'foldername'=>$add_data['foldername']])->find();
            if($list==null){
                db('folder')->insert($add_data);
                $this->success('新建文件夹成功');
@@ -146,22 +146,25 @@ class Index extends Controller
             $this->success('移动成功','index/index.html?path='.$parentid);
         }
     }
-    public function Delete(){           //删除
+    public function Delete(){       //删除
+        $arr=$_POST['arr'];
+        $add_data['userId']=Session::get('uinfo')['userId'];
         $add_data['createtime']=date(date('Y-m-d H:i:s'));
-        $add_data['fid']=$_POST['id'];
-        $add_data['type']=$_POST['type'];
-        if($_POST['type']=='1'){
-            $fileid=$_POST['id'];
-            db('files')->where('fileid',$fileid)->update('is_recycle',1);
-            db('bin')->insert($add_data);
+        foreach ($arr as $key => $value){
+           if($value['type']==0){
+               $add_data['id']=$value['id'];
+               $add_data['type']=$value['type'];
+               db('folder')->where('folderid',$add_data['id'])->update(['is_recycle'=>1]);
+               db('bin')->insert($add_data);
+           }
+           else{
+               $add_data['id']=$value['id'];
+                $add_data['type']=$value['type'];
+               db('files')->where('fileid',$add_data['id'])->update(['is_recycle'=>1]);
+               db('bin')->insert($add_data);
+           }
         }
-        else{
-            $folderid=$_POST['id'];
-            db('folder')->where('folderid',$folderid)->update('is_recycle',1);
-            db('folder')->where('parentid',$folderid)->update('is_recycle',1);
-            db('files')->where('folderid',$folderid)->update('is_recycle',1);
-            db('bin')->insert($add_data);
-        }
+
     }
     public function download(){ //下载
         $fileid=$_GET('fileid');

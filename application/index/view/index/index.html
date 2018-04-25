@@ -23,7 +23,7 @@
         <div class="layui-btn-group">
             <button class="layui-btn layui-btn-primary layui-btn-sm"><i class="layui-icon">&#xe61e;</i>下载</button>
             <button class="layui-btn layui-btn-primary layui-btn-sm"><i class="layui-icon">&#xe64c;</i>分享</button>
-            <button class="layui-btn layui-btn-primary layui-btn-sm"><i class="layui-icon">&#xe640;</i>删除</button>
+            <button class="layui-btn layui-btn-primary layui-btn-sm" id="deleteAll"><i class="layui-icon">&#xe640;</i>删除</button>
             <button class="layui-btn layui-btn-primary layui-btn-sm">重命名</button>
             <button class="layui-btn layui-btn-primary layui-btn-sm">复制到</button>
             <button class="layui-btn layui-btn-primary layui-btn-sm">重命名</button>
@@ -117,8 +117,8 @@
             history.replaceState(GetParam('path'),null,location.pathname + '?path='+id)
             $.get('showfolder',{path:id},function (data) {
                data.forEach(function (value, index) {
-                   $('#file-table').prepend(' <tr class="tr" id='+value.folderid+'>\n' +
-                       '                <td><i class="layui-icon fileicon">&#xe622;</i>'+value.foldername+'</td>\n' +
+                   $('#file-table').prepend(' <tr class="tr folder" id='+value.folderid+'>\n' +
+                       '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div><i class="layui-icon fileicon">&#xe622;</i>'+value.foldername+'</td>\n' +
                        '                <td></td>\n' +
                        '                <td>'+value.createtime+'</td>\n' +
                        '            </tr>')
@@ -132,16 +132,22 @@
                             case 4:var icon = '<div class="icons icons-video"></div>';break;
                             case 5:var icon = '<div class="icons icons-other"></div>';break;
                         }
-                        switch(value.filesize<1000?1:(value.filesize<1000*1000?2:(value.filesize<1000*1000*1000?3:4))){
+                        switch (value.filesize<1000?1:(value.filesize<1000*1000?2:3)){
                             case 1:var size=value.filesize+'B';break;
-                            case 2:var size=(value.filesize/1000)+'K';break;
-                            case 3:var size=(value.filesize/1000000)+'M';break;
-                            case 4:var size=(value.filesize/1000000000)+'G';break;
-
+                            case 2:
+                                var num=(value.filesize/1000).toFixed(1);
+                                var size=num+'K';break;
+                            case 3:
+                                var num=(value.filesize/1000000).toFixed(1);
+                                var size=num+'M';break;
+                            case 4:
+                                var num=(value.filesize/1000000000).toFixed(1)
+                                var size=num+'G';break;
                         }
 
-                        $('#file-table').append(' <tr class="tr" id='+value.fileid+'>\n' +
-                            '                <td>'+ icon +value.filename+'</td>\n' +
+
+                        $('#file-table').append(' <tr class="tr file" id='+value.fileid+'>\n' +
+                            '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +value.filename+'</td>\n' +
                             '                <td>'+size+'</td>\n' +
                             '                <td>'+value.createtime+'</td>\n' +
                             '            </tr>')
@@ -192,8 +198,15 @@
                     }
                     switch (value.filesize<1000?1:(value.filesize<1000*1000?2:3)){
                         case 1:var size=value.filesize+'B';break;
-                        case 2:var size=(value.filesize/1000)+'K';break;
-                        case 3:var size=(value.filesize/1000000)+'M';break;
+                        case 2:
+                            var num=(value.filesize/1000).toFixed(1);
+                            var size=num+'K';break;
+                        case 3:
+                            var num=(value.filesize/1000000).toFixed(1);
+                            var size=num+'M';break;
+                        case 4:
+                            var num=(value.filesize/1000000000).toFixed(1)
+                            var size=num+'G';break;
                     }
 
                     $('#file-table').append(' <tr class="tr" id='+value.folderid+' >\n' +
@@ -267,10 +280,41 @@
         }
 
         //双击打开文件夹
-        $('#file-table').delegate('.tr','dblclick',function(){
+        $('#file-table').delegate('tr.folder','dblclick',function(){
             getData(this.id)
             history.pushState(GetParam('path'),null,location.pathname + '?path='+GetParam('path'))
         })
+
+        $('#file-table').delegate('.tr','click',function(){
+            if($(this).find('.layui-form-checkbox').hasClass('layui-form-checked')){
+                $(this).find('.layui-form-checkbox').removeClass('layui-form-checked')
+            }else{
+                $(this).find('.layui-form-checkbox').addClass('layui-form-checked')
+            }
+
+        })
+        $('#deleteAll').click(function () {
+            var arr = []
+            $('.layui-form-checkbox').each(function () {
+                if($(this).hasClass('layui-form-checked')){
+                    if($(this).parent().parent().hasClass('folder')){
+                        arr.push({
+                            id: $(this).parent().parent().attr('id'),
+                            type: 0
+                        })
+                    }else{
+                        arr.push({
+                            id: $(this).parent().parent().attr('id'),
+                            type: 1
+                        })
+                    }
+                }
+            })
+            $.post('delete',{arr:arr},function (data) {
+                getData(GetParam('path'))
+            });
+        })
+
     })
 
 </script>
