@@ -132,10 +132,17 @@
                             case 4:var icon = '<div class="icons icons-video"></div>';break;
                             case 5:var icon = '<div class="icons icons-other"></div>';break;
                         }
+                        switch(value.filesize<1000?1:(value.filesize<1000*1000?2:(value.filesize<1000*1000*1000?3:4))){
+                            case 1:var size=value.filesize+'B';break;
+                            case 2:var size=(value.filesize/1000)+'K';break;
+                            case 3:var size=(value.filesize/1000000)+'M';break;
+                            case 4:var size=(value.filesize/1000000000)+'G';break;
 
-                        $('#file-table').append(' <tr class="tr" id='+value.folderid+'>\n' +
+                        }
+
+                        $('#file-table').append(' <tr class="tr" id='+value.fileid+'>\n' +
                             '                <td>'+ icon +value.filename+'</td>\n' +
-                            '                <td>'+value.filesize+'</td>\n' +
+                            '                <td>'+size+'</td>\n' +
                             '                <td>'+value.createtime+'</td>\n' +
                             '            </tr>')
                     })
@@ -254,6 +261,10 @@
             });
 
         })
+
+        function rename() {
+
+        }
 
         //双击打开文件夹
         $('#file-table').delegate('.tr','dblclick',function(){
