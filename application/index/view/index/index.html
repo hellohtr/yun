@@ -3,12 +3,12 @@
 <ul class="layui-nav layui-nav-tree" lay-filter="test" style="height: 100%;position:absolute;top: 0;padding-top: 60px" id="menu">
 
 
-    <li class="layui-nav-item menu-active" id="allfile"><a href="javascript:;">全部文件</a></li>
-    <li class="layui-nav-item type-image"><a href="javascript:;">图片</a></li>
-    <li class="layui-nav-item type-document"><a href="javascript:;">文档</a></li>
-    <li class="layui-nav-item type-music" ><a href="javascript:;">音乐</a></li>
-    <li class="layui-nav-item type-video" ><a href="javascript:;">视频</a></li>
-    <li class="layui-nav-item type-other"><a href="javascript:;">其他</a></li>
+    <li class="layui-nav-item type-all" data-type="0"><a href="javascript:;">全部文件</a></li>
+    <li class="layui-nav-item type-image" data-type="1"><a href="javascript:;">图片</a></li>
+    <li class="layui-nav-item type-document" data-type="2"><a href="javascript:;">文档</a></li>
+    <li class="layui-nav-item type-music" data-type="3"><a href="javascript:;">音乐</a></li>
+    <li class="layui-nav-item type-video" data-type="4"><a href="javascript:;">视频</a></li>
+    <li class="layui-nav-item type-other" data-type="5"><a href="javascript:;">其他</a></li>
     <li class="layui-nav-item"><a href="javascript:;">我的分享</a></li>
     <li class="layui-nav-item"><a href="javascript:;">回收站</a></li>
 </ul>
@@ -99,13 +99,14 @@
             if (r != null){
                 return decodeURI(r[2])
             }else{
-                return 0
+                return null
             }
         }
         //获取文件列表
         function getData(id) {
             $('.tr').remove()
-            history.replaceState(GetParam('path'),null,location.pathname + '?path='+id)
+            $('.layui-nav').find('li[data-type=0]').addClass('menu-active').siblings().removeClass('menu-active')
+            history.replaceState({path:GetParam('path')},null,location.pathname + '?path='+id)
             $.get('showfolder',{path:id},function (data) {
                data.forEach(function (value, index) {
                    $('#file-table').prepend(' <tr class="tr folder" id='+value.folderid+'>\n' +
@@ -144,10 +145,22 @@
                 },'json');
             },'json');
         }
-        getData(GetParam('path'))
+
+        if(!GetParam('path')&&!GetParam('type')){
+            getData(0)
+        }
+        if(GetParam('path')){
+            getData(GetParam('path'))
+        }
+        if(GetParam('type')){
+            getTypeData(GetParam('type'))
+        }
+
         function getTypeData(type) {
             $('.tr').remove()
-                $.get('showTypeData',{type:type},function (data){
+            $('.layui-nav').find('li[data-type='+type+']').addClass('menu-active').siblings().removeClass('menu-active')
+            history.replaceState({type:GetParam('type')},null,location.pathname + '?type='+type)
+                $.get('showtype',{type:type},function (data){
                     data.forEach(function (value,index) {
                         switch (value.filetype){
                             case 1:var icon = '<div class="icons icons-image"></div>';break;
@@ -176,7 +189,9 @@
                     })
                 },'json');
             }
-
+        $('.type-all').click(function () {
+            getData(0)
+        })
         $('.type-document').click(function () {
             getTypeData(2)
         })
@@ -192,60 +207,18 @@
         $('.type-other').click(function () {
             getTypeData(5)
         })
+        $('.item_title').click(function () {
+            getData(0)
+        })
 
-        function getTypeData(type) {
-            $('.tr').remove()
-            $.get('showTypeData',{type:type},function (data){
-                data.forEach(function (value, index) {
-                    switch (value.filetype){
-                        case 1:var icon = '<div class="icons icons-image"></div>';break;
-                        case 2:var icon = '<div class="icons icons-documnet"></div>';break;
-                        case 3:var icon = '<div class="icons icons-music"></div>';break;
-                        case 4:var icon = '<div class="icons icons-video"></div>';break;
-                        case 5:var icon = '<div class="icons icons-other"></div>';break;
-                    }
-                    switch (value.filesize<1000?1:(value.filesize<1000*1000?2:3)){
-                        case 1:var size=value.filesize+'B';break;
-                        case 2:
-                            var num=(value.filesize/1000).toFixed(1);
-                            var size=num+'K';break;
-                        case 3:
-                            var num=(value.filesize/1000000).toFixed(1);
-                            var size=num+'M';break;
-                        case 4:
-                            var num=(value.filesize/1000000000).toFixed(1)
-                            var size=num+'G';break;
-                    }
 
-                    $('#file-table').append(' <tr class="tr" id='+value.folderid+' >\n' +
-                        '                <td>'+ icon +value.filename+'</td>\n' +
-                        '                <td>'+size+'</td>\n' +
-                        '                <td>'+value.createtime+'</td>\n' +
-                        '            </tr>')
-                })
-            },'json');
-        }
-        $('.type-document').click(function () {
-            getTypeData(2)
-        })
-        $('.type-image').click(function () {
-            getTypeData(1)
-        })
-        $('.type-music').click(function () {
-            getTypeData(3)
-        })
-        $('.type-video').click(function () {
-            getTypeData(4)
-        })
-        $('.type-other').click(function () {
-            getTypeData(5)
-        })
 
         //监听历史回退
         window.addEventListener('popstate', function (e) {
-            if(e.state){
-                console.log(e.state)
-                getData(e.state)
+            if(e.state.path){
+                getData(e.state.path)
+            }else{
+                getTypeData(e.state.type)
             }
         });
 
@@ -286,7 +259,7 @@
         //双击打开文件夹
         $('#file-table').delegate('tr.folder','dblclick',function(){
             getData(this.id)
-            history.pushState(GetParam('path'),null,location.pathname + '?path='+GetParam('path'))
+            history.pushState({path:GetParam('path')},null,location.pathname + '?path='+GetParam('path'))
         })
 
         $('#file-table').delegate('.tr','click',function(){
@@ -314,7 +287,7 @@
                     }
                 }
             })
-            $.post('delete',{arr:arr},function (data) {
+            $.post('Delete',{arr:arr},function (data) {
                 getData(GetParam('path'))
             });
         })

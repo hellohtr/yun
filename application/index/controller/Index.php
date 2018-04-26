@@ -127,9 +127,6 @@ class Index extends Controller
         else{
             db('files')->where(['userId'=>$userId,'fileid'=>$id])->data(['filename'=>$name])->update();
         }
-
-
-
     }
 
     public function remove(){           //移动
@@ -153,13 +150,13 @@ class Index extends Controller
         function Recursion($id)
         {
             $list = db('folder')->where(['parentid' => $id, 'is_recycle' => 0])->select();
-            if ($list != null) {
+
                 foreach ($list as $item) {
-                    Recursion($item['id']);
+                    Recursion($item['folderid']);
                 }
                 db('folder')->where('folderid', $id)->update(['is_recycle' => 1]);
                 db('files')->where('folderid', $id)->update(['is_recycle' => 1]);
-            }
+
         }
 
         foreach ($arr as $key => $value) {
@@ -227,13 +224,11 @@ class Index extends Controller
         function Recursion($id)
         {
             $list = db('folder')->where(['parentid' => $id, 'is_recycle' => 1])->select();
-            if ($list != null) {
                 foreach ($list as $item) {
-                    Recursion($item['id']);
+                    Recursion($item['folderid']);
                 }
                 db('folder')->where('folderid', $id)->update(['is_recycle' => 0]);
                 db('files')->where('folderid', $id)->update(['is_recycle' => 0]);
-            }
         }
         if($type==0){
            Recursion($id);
