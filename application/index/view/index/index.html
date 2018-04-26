@@ -3,11 +3,11 @@
 <ul class="layui-nav layui-nav-tree" lay-filter="test" style="height: 100%;position:absolute;top: 0;padding-top: 60px" id="menu">
 
 
-    <li class="layui-nav-item menu-active"><a href="javascript:;">全部文件</a></li>
+    <li class="layui-nav-item menu-active" id="allfile"><a href="javascript:;">全部文件</a></li>
     <li class="layui-nav-item type-image"><a href="javascript:;">图片</a></li>
     <li class="layui-nav-item type-document"><a href="javascript:;">文档</a></li>
-    <li class="layui-nav-item type-music"><a href="javascript:;">音乐</a></li>
-    <li class="layui-nav-item type-video"><a href="javascript:;">视频</a></li>
+    <li class="layui-nav-item type-music" ><a href="javascript:;">音乐</a></li>
+    <li class="layui-nav-item type-video" ><a href="javascript:;">视频</a></li>
     <li class="layui-nav-item type-other"><a href="javascript:;">其他</a></li>
     <li class="layui-nav-item"><a href="javascript:;">我的分享</a></li>
     <li class="layui-nav-item"><a href="javascript:;">回收站</a></li>
@@ -24,7 +24,7 @@
             <button class="layui-btn layui-btn-primary layui-btn-sm"><i class="layui-icon">&#xe61e;</i>下载</button>
             <button class="layui-btn layui-btn-primary layui-btn-sm"><i class="layui-icon">&#xe64c;</i>分享</button>
             <button class="layui-btn layui-btn-primary layui-btn-sm" id="deleteAll"><i class="layui-icon">&#xe640;</i>删除</button>
-            <button class="layui-btn layui-btn-primary layui-btn-sm">重命名</button>
+            <button class="layui-btn layui-btn-primary layui-btn-sm" id="rename" >重命名</button>
             <button class="layui-btn layui-btn-primary layui-btn-sm">复制到</button>
             <button class="layui-btn layui-btn-primary layui-btn-sm">重命名</button>
         </div>
@@ -51,20 +51,15 @@
                 <th >创建时间</th>
             </tr>
             </thead>
-
         </table>
-
     </div>
-
 </div>
 <script>
     $(function(){
-
         var layer
         layui.use('layer',function () {
             layer = layui.layer
         })
-
         //新建文件夹
         $('#newFolder').click(function(){
             if ($('.btn-folder').length>0){
@@ -95,8 +90,6 @@
                 }
                 getData(GetParam('path'))
             },'json');
-
-
         })
 
         //获取url参数
@@ -109,11 +102,9 @@
                 return 0
             }
         }
-
         //获取文件列表
         function getData(id) {
             $('.tr').remove()
-
             history.replaceState(GetParam('path'),null,location.pathname + '?path='+id)
             $.get('showfolder',{path:id},function (data) {
                data.forEach(function (value, index) {
@@ -144,8 +135,6 @@
                                 var num=(value.filesize/1000000000).toFixed(1)
                                 var size=num+'G';break;
                         }
-
-
                         $('#file-table').append(' <tr class="tr file" id='+value.fileid+'>\n' +
                             '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +value.filename+'</td>\n' +
                             '                <td>'+size+'</td>\n' +
@@ -160,9 +149,28 @@
             $('.tr').remove()
                 $.get('showTypeData',{type:type},function (data){
                     data.forEach(function (value,index) {
-                        $('#file-table').prepend(' <tr class="tr" id='+value.folderid+'>\n' +
-                            '                <td><i class="layui-icon fileicon">&#xe622;</i>'+value.foldername+'</td>\n' +
-                            '                <td></td>\n' +
+                        switch (value.filetype){
+                            case 1:var icon = '<div class="icons icons-image"></div>';break;
+                            case 2:var icon = '<div class="icons icons-documnet"></div>';break;
+                            case 3:var icon = '<div class="icons icons-music"></div>';break;
+                            case 4:var icon = '<div class="icons icons-video"></div>';break;
+                            case 5:var icon = '<div class="icons icons-other"></div>';break;
+                        }
+                        switch (value.filesize<1000?1:(value.filesize<1000*1000?2:3)){
+                            case 1:var size=value.filesize+'B';break;
+                            case 2:
+                                var num=(value.filesize/1000).toFixed(1);
+                                var size=num+'K';break;
+                            case 3:
+                                var num=(value.filesize/1000000).toFixed(1);
+                                var size=num+'M';break;
+                            case 4:
+                                var num=(value.filesize/1000000000).toFixed(1)
+                                var size=num+'G';break;
+                        }
+                        $('#file-table').append(' <tr class="tr file" id='+value.fileid+'>\n' +
+                            '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +value.filename+'</td>\n' +
+                            '                <td>'+size+'</td>\n' +
                             '                <td>'+value.createtime+'</td>\n' +
                             '            </tr>')
                     })
@@ -275,10 +283,6 @@
 
         })
 
-        function rename() {
-
-        }
-
         //双击打开文件夹
         $('#file-table').delegate('tr.folder','dblclick',function(){
             getData(this.id)
@@ -314,6 +318,28 @@
                 getData(GetParam('path'))
             });
         })
+        $('#rename').click(function () {
+            var arr = []
+            if($('.layui-form-checked').parent().parent().hasClass('folder')){
+                arr.push({
+                    id:$('.layui-form-checked').parent().parent().attr('id'),
+                    type:0
+                })
+            }
+            else{
+                arr.push({
+                    id:$('.layui-form-checked').parent().parent().attr('id'),
+                    name:'hejdjfs',
+                    parentid:GetParam('path'),
+                    type:1
+                })
+                }
+            $.post('rename',{arr:arr},function (data) {
+                getData(GetParam('path'))
+            });
+            }
+
+        )
 
     })
 

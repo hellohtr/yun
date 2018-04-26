@@ -111,10 +111,10 @@ class Index extends Controller
     }
 
     public function rename(){       //重命名
-        $type=$_POST['type'];
-        $name=$_POST['name'];
-        $id=$_POST['id'];
-        $parentid=$_POST['parentid'];
+        $type=$_POST['arr']['type'];
+        $name=$_POST['arr']['name'];
+        $id=$_POST['arr']['id'];
+        $parentid=$_POST['arr']['parentid'];
         $userId=Session::get('uinfo')['userId'];
         if($type==0){
             $list=db('folder')->where(['userId'=>$userId,'parentid'=>$parentid,'foldername'=>$name,'is_recycle'=>0])->select();
@@ -122,7 +122,7 @@ class Index extends Controller
                 db('folder')->where(['userId'=>$userId,'folderid'=>$id])->data(['foldername'=>$name])->update();
                 $this->success('重命名成功','index/index.html?path='.$parentid);
             }
-            else $this->error('文件名已存在','index/index.html?path='.$parentid);
+            else $this->error('文件夹名已存在','index/index.html?path='.$parentid);
         }
         else{
             db('files')->where(['userId'=>$userId,'fileid'=>$id])->data(['filename'=>$name])->update();
@@ -147,25 +147,37 @@ class Index extends Controller
         }
     }
     public function Delete(){       //删除
-        $arr=$_POST['arr'];
-        $add_data['userId']=Session::get('uinfo')['userId'];
-        $add_data['createtime']=date(date('Y-m-d H:i:s'));
-        foreach ($arr as $key => $value){
-           if($value['type']==0){
-               $add_data['id']=$value['id'];
-               $add_data['type']=$value['type'];
-               db('folder')->where('folderid',$add_data['id'])->update(['is_recycle'=>1]);
-               db('bin')->insert($add_data);
-           }
-           else{
-               $add_data['id']=$value['id'];
-                $add_data['type']=$value['type'];
-               db('files')->where('fileid',$add_data['id'])->update(['is_recycle'=>1]);
-               db('bin')->insert($add_data);
-           }
+        $arr = $_POST['arr'];
+        $add_data['userId'] = Session::get('uinfo')['userId'];
+        $add_data['createtime'] = date(date('Y-m-d H:i:s'));
+        function Recursion($id)
+        {
+            $list = db('folder')->where(['parentid' => $id, 'is_recycle' => 0])->select();
+            if ($list != null) {
+                foreach ($list as $item) {
+                    Recursion($item['id']);
+                }
+                db('folder')->where('folderid', $id)->update(['is_recycle' => 1]);
+                db('files')->where('folderid', $id)->update(['is_recycle' => 1]);
+            }
         }
 
+        foreach ($arr as $key => $value) {
+            if ($value['type'] == 0) {
+                $add_data['id'] = $value['id'];
+                $add_data['type'] = $value['type'];
+                Recursion($add_data['id']);
+                db('bin')->insert($add_data);
+            } else {
+                $add_data['id'] = $value['id'];
+                $add_data['type'] = $value['type'];
+                db('files')->where('fileid', $add_data['id'])->update(['is_recycle' => 1]);
+                db('bin')->insert($add_data);
+            }
+        }
     }
+
+
     public function download(){ //下载
         $fileid=$_GET('fileid');
         $list=db('files')->where('fileid',$fileid)->select();
@@ -212,10 +224,19 @@ class Index extends Controller
         $id=$_POST['id'];
         $type=$_POST['type'];
         $userId=Session::get('uinfo')['userId'];
+        function Recursion($id)
+        {
+            $list = db('folder')->where(['parentid' => $id, 'is_recycle' => 1])->select();
+            if ($list != null) {
+                foreach ($list as $item) {
+                    Recursion($item['id']);
+                }
+                db('folder')->where('folderid', $id)->update(['is_recycle' => 0]);
+                db('files')->where('folderid', $id)->update(['is_recycle' => 0]);
+            }
+        }
         if($type==0){
-            db('folder')->where(['userId'=>$userId,'folderid'=>'id'])->update(['is_recycle'=>0]);
-            db('files')->where(['userId'=>$userId,'folderid'=>'id'])->update(['is_recycle'=>0]);
-            db('folder')->where(['userId'=>$userId,'parentid'=>'id'])->update(['is_recycle'=>0]);
+           Recursion($id);
         }
         else{
             db('fileid')->where(['userId'=>$userId,'fileid'=>'id'])->update(['is_recycle'=>0]);
