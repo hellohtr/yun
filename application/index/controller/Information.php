@@ -16,7 +16,13 @@ class Information extends Controller{
 
     }
     public function alterInformation(){
-
+        $add_data=$_POST['arr'];
+        $userId=Session::get('uinfo')['userId'];
+        db('user')->where('userId',$userId)->update($add_data);
     }
-
+    public function getInformation(){
+       $userId=Session::get('uinfo')['userId'];
+       $data=db('user')->where('userId',$userId)->select();
+       echo json_encode($data);
+    }
 }
