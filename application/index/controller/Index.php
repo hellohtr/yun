@@ -264,6 +264,29 @@ class Index extends Controller
             db('files')->insert($add_data);
         }
     }
+    public function showBinFolder(){
+        $arr=array();
+        $userId=Session::get('uinfo')['userId'];
+        $listFolder=db('bin')->where(['userId'=>$userId,'type'=>0])->select();
+        foreach ($listFolder as $value){
+            $tmp=db('folder')->where('folderid',$value['id'])->select();
+            $tmp['createtime']=$value['createtime'];
+            $tmp['type']=$value['type'];
+            array_push($arr,$tmp);
+        }
+        echo json_encode($arr);
+    }
+    public function showBinFile(){
+        $arr=array();
+        $userId=Session::get('uinfo')['userId'];
+        $listFolder=db('bin')->where(['userId'=>$userId,'type'=>1])->select();
+        foreach ($listFolder as $value){
+            $tmp=db('files')->where('fileid',$value['id'])->select();
+            $tmp['createtime']=$value['createtime'];
+            array_push($arr,$tmp);
+        }
+        echo json_encode($arr);
+    }
 }
 
 
