@@ -21,12 +21,12 @@
 
         <button class="layui-btn layui-btn-primary layui-btn-sm" id="newFolder"> <i class="layui-icon">&#xe7a0;</i>新建文件夹</button>
         <div class="layui-btn-group">
-            <button class="layui-btn layui-btn-primary layui-btn-sm"><i class="layui-icon">&#xe61e;</i>下载</button>
-            <button class="layui-btn layui-btn-primary layui-btn-sm"><i class="layui-icon">&#xe64c;</i>分享</button>
+            <button class="layui-btn layui-btn-primary layui-btn-sm" id="download"><i class="layui-icon" >&#xe61e;</i>下载</button>
+            <button class="layui-btn layui-btn-primary layui-btn-sm" id="share"><i class="layui-icon">&#xe64c;</i>分享</button>
             <button class="layui-btn layui-btn-primary layui-btn-sm" id="deleteAll"><i class="layui-icon">&#xe640;</i>删除</button>
             <button class="layui-btn layui-btn-primary layui-btn-sm" id="rename" >重命名</button>
-            <button class="layui-btn layui-btn-primary layui-btn-sm">复制到</button>
-            <button class="layui-btn layui-btn-primary layui-btn-sm">重命名</button>
+            <button class="layui-btn layui-btn-primary layui-btn-sm" id="copy">复制到</button>
+            <button class="layui-btn layui-btn-primary layui-btn-sm" id="remove">移动到</button>
         </div>
         <div class="search" >
             <div class="layui-input-inline"><input type="text" class=" layui-input " placeholder="搜索您的文件" ></div>
@@ -338,9 +338,7 @@
                 getData(GetParam('path'))
             });
             }
-
         )
-
     })
 
 </script>
