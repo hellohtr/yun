@@ -27,9 +27,12 @@
             <button class="layui-btn layui-btn-primary layui-btn-sm" id="remove">移动到</button>
         </div>
         <div class="search" >
-            <div class="layui-input-inline"><input type="text" class=" layui-input " placeholder="搜索您的文件" ></div>
-            <i class="layui-icon" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
-        </div>
+        <div class="layui-input-inline"><input type="text" class=" layui-input " placeholder="搜索您的文件" ></div>
+        <i class="layui-icon" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
+    </div>
+        <button type="button" class="layui-btn   layui-btn-normal layui-btn-sm" id="clearall" hidden="true" style="float: right">
+            <i class="layui-icon">&#xe640;</i>清空回收站
+        </button>
     </div>
     <div class="filelist">
         <span class="layui-breadcrumb">
@@ -45,7 +48,7 @@
             <tr>
                 <th style="width: 600px">文件名</th>
                 <th style="width: 220px;" >大小</th>
-                <th >创建时间</th>
+                <th id="time">创建时间</th>
             </tr>
             </thead>
         </table>
@@ -102,6 +105,7 @@
         //获取文件列表
         function getData(id) {
             $('.tr').remove()
+            $('#time').text('创建时间')
             $('.layui-nav').find('li[data-type=0]').addClass('menu-active').siblings().removeClass('menu-active')
             history.replaceState({path:GetParam('path')},null,location.pathname + '?path='+id)
             $.get('showfolder',{path:id},function (data) {
@@ -153,6 +157,7 @@
         }
         function getTypeData(type) {
             $('.tr').remove()
+            $('#time').text('创建时间')
             $('.layui-nav').find('li[data-type='+type+']').addClass('menu-active').siblings().removeClass('menu-active')
             history.replaceState({type:GetParam('type')},null,location.pathname + '?type='+type)
                 $.get('showtype',{type:type},function (data){
@@ -185,14 +190,46 @@
                 },'json');
             }
         function getBin() {
-            // $('.tr').remove()
-            // $('.layui-nav').find('li[data-type='+type+']').addClass('menu-active').siblings().removeClass('menu-active')
-            // history.replaceState({type:GetParam('type')},null,location.pathname + '?type='+type)
+            $('#time').text('删除时间')
+            $('.layui-btn-group').hide();
+            $('#search').hide()
+            $('#upload').hide()
+            $('#newFolder').hide()
+            $('#clearall').show()
+            $('.tr').remove()
+            $.get('showBin',function (data){
+                data.forEach(function (value,index) {
+                    switch (value.filetype){
+                        case 0:var icon='<i class="layui-icon fileicon">&#xe622;</i>';break;
+                        case 1:var icon = '<div class="icons icons-image"></div>';break;
+                        case 2:var icon = '<div class="icons icons-documnet"></div>';break;
+                        case 3:var icon = '<div class="icons icons-music"></div>';break;
+                        case 4:var icon = '<div class="icons icons-video"></div>';break;
+                        case 5:var icon = '<div class="icons icons-other"></div>';break;
+                    }
+                    if(value.hasOwnProperty('filesize')){
+                        switch (value.filesize<1000?1:(value.filesize<1000*1000?2:3)){
+                            case 1:var size=value.filesize+'B';break;
+                            case 2:
+                                var num=(value.filesize/1000).toFixed(1);
+                                var size=num+'K';break;
+                            case 3:
+                                var num=(value.filesize/1000000).toFixed(1);
+                                var size=num+'M';break;
+                            case 4:
+                                var num=(value.filesize/1000000000).toFixed(1)
+                                var size=num+'G';break;
+                        }
+                    }
+                    else var size=''
 
-
-
-
-
+                    $('#file-table').append(' <tr class="tr" id='+value.fileid+' data-type='+value.filetype+'>\n' +
+                        '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +value.filename+'</td>\n' +
+                        '                <td>'+size+'</td>\n' +
+                        '                <td>'+value.createtime+'</td>\n' +
+                        '            </tr>')
+                })
+            },'json');
         }
         $('.type-all').click(function () {
             getData(0)
@@ -213,7 +250,11 @@
             getTypeData(5)
         })
         $('.item_title').click(function () {
+
             getData(0)
+        })
+        $('.bintable').click(function () {
+            getBin()
         })
 
         //监听历史回退
@@ -265,6 +306,7 @@
             history.pushState({path:GetParam('path')},null,location.pathname + '?path='+GetParam('path'))
         })
 
+        //单击选择或取消选择
         $('#file-table').delegate('.tr','click',function(){
             if($(this).find('.layui-form-checkbox').hasClass('layui-form-checked')){
                 $(this).find('.layui-form-checkbox').removeClass('layui-form-checked')
@@ -294,7 +336,7 @@
                 getData(GetParam('path'))
             });
         })
-        $('#rename').click(function () {
+        $('#rename').click(function () {        //重命名
             var arr = []
             if($('.layui-form-checked').parent().parent().hasClass('folder')){
                 arr.push({
