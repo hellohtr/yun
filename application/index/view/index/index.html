@@ -30,7 +30,7 @@
         <div class="layui-input-inline"><input type="text" class=" layui-input " placeholder="搜索您的文件" ></div>
         <i class="layui-icon" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
     </div>
-        <button type="button" class="layui-btn   layui-btn-normal layui-btn-sm" id="clearall" hidden="true" style="float: right">
+        <button type="button" class="layui-btn   layui-btn-normal layui-btn-sm" id="clearall"  style="float: right;margin-right: 15px;margin-bottom: 5px">
             <i class="layui-icon">&#xe640;</i>清空回收站
         </button>
     </div>
@@ -105,6 +105,14 @@
         //获取文件列表
         function getData(id) {
             $('.tr').remove()
+            $('.layui-btn-group').show();
+            $('#search').show()
+            $('#upload').show()
+            $('#newFolder').hide()
+            $('.search').show()
+            $('#clearall').show()
+            $('.filelist').hide()
+            $('.tr').remove()
             $('#time').text('创建时间')
             $('.layui-nav').find('li[data-type=0]').addClass('menu-active').siblings().removeClass('menu-active')
             history.replaceState({path:GetParam('path')},null,location.pathname + '?path='+id)
@@ -147,15 +155,22 @@
             },'json');
         }
         if(!GetParam('path')&&!GetParam('type')){
+
             getData(0)
-        }
-        if(GetParam('path')){
+        }else if(GetParam('path')){
             getData(GetParam('path'))
         }
         if(GetParam('type')){
             getTypeData(GetParam('type'))
         }
         function getTypeData(type) {
+            $('.layui-btn-group').show();
+            $('#search').hide()
+            $('#upload').hide()
+            $('#newFolder').hide()
+            $('.search').hide()
+            $('#clearall').hide()
+            $('.filelist').hide()
             $('.tr').remove()
             $('#time').text('创建时间')
             $('.layui-nav').find('li[data-type='+type+']').addClass('menu-active').siblings().removeClass('menu-active')
@@ -195,11 +210,13 @@
             $('#search').hide()
             $('#upload').hide()
             $('#newFolder').hide()
+            $('.search').hide()
             $('#clearall').show()
+            $('.filelist').hide()
             $('.tr').remove()
             $.get('showBin',function (data){
                 data.forEach(function (value,index) {
-                    switch (value.filetype){
+                    switch (value.type){
                         case 0:var icon='<i class="layui-icon fileicon">&#xe622;</i>';break;
                         case 1:var icon = '<div class="icons icons-image"></div>';break;
                         case 2:var icon = '<div class="icons icons-documnet"></div>';break;
@@ -223,8 +240,8 @@
                     }
                     else var size=''
 
-                    $('#file-table').append(' <tr class="tr" id='+value.fileid+' data-type='+value.filetype+'>\n' +
-                        '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +value.filename+'</td>\n' +
+                    $('#file-table').prepend(' <tr class="tr" id='+value.bid+' data-type='+value.type+'>\n' +
+                        '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +value.name+'</td>\n' +
                         '                <td>'+size+'</td>\n' +
                         '                <td>'+value.createtime+'</td>\n' +
                         '            </tr>')

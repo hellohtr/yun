@@ -359,24 +359,18 @@ class Index extends Controller
         $listFolder = db('bin')->where(['userId' => $userId])->select();
         foreach ($listFolder as $value) {
             if ($value['type'] == 0) {
-                $tmp = db('folder')->where('folderid', $value['id'])->select();
-                $tmp['createtime'] = $value['createtime'];
-                $tmp['id'] = $tmp['folderid'];
-                unset($tmp['bid']);
-                $tmp['name'] = ['foldername'];
-                unset($tmp['foldername']);
-                $tmp['type'] = $value['type'];
-                array_push($arr, $tmp);
+                $tmp = db('folder')->where('folderid', $value['id'])->find();
+                $value['name']=$tmp['foldername'];
+                unset($value['id']);
+                array_push($arr, $value);
+
             } else {
-                $tmp = db('files')->where('fileid', $value['id'])->select();
-                $tmp['createtime'] = $value['createtime'];
-                $tmp['type'] = $tmp['filetype'];
-                $tmp['name'] = $tmp['filename'];
-                $tmp['id'] = $tmp['bid'];
-                unset($tmp['filename']);
-                unset($tmp['fileid']);
-                unset($tmp['filetype']);
-                array_push($arr, $tmp);
+                $tmp = db('files')->where('fileid', $value['id'])->find();
+                $value['name']=$tmp['filename'];
+                $value['filesize']=$tmp['filesize'];
+                $value['type']=$tmp['filetype'];
+                unset($value['id']);
+               array_push($arr, $value);
             }
 
         }
@@ -384,17 +378,7 @@ class Index extends Controller
     }
 
 
-//    public function showBinFile(){
-//        $arr=array();
-//        $userId=Session::get('uinfo')['userId'];
-//        $listFolder=db('bin')->where(['userId'=>$userId,'type'=>1])->select();
-//        foreach ($listFolder as $value){
-//            $tmp=db('files')->where('fileid',$value['id'])->select();
-//            $tmp['createtime']=$value['createtime'];
-//            array_push($arr,$tmp);
-//        }
-//        echo json_encode($arr);
-//    }
+
 
 
 }
