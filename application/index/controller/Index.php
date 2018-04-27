@@ -232,6 +232,58 @@ class Index extends Controller
         echo json_encode($listfloder);
 
     }
+    public function deleteShare(){     //删除分享
+         $data=$_POST['arr'];
+        function Recursion($id)
+        {
+            $list = db('folder')->where(['parentid' => $id, 'is_share' => 1])->select();
+            foreach ($list as $item) {
+                Recursion($item['folderid']);
+            }
+            db('folder')->where('folderid', $id)->update(['is_share' => 0]);
+            db('files')->where('folderid', $id)->update(['is_share' => 0]);
+        }
+         $userId=Session::get('uinfo')['userId'];
+         foreach ($data as $tmp){
+             $list=db('share')->where(['sid'=>$data['sid'],'userId'=>$userId])->select();
+             if($list['type']==0){
+                 Recursion($list['sid']);
+                 db('share')->where('sid',$list['sid'])->delete();
+             }else {
+                 db('files')->where('fileid',$list['id'])->update(['is_share' => 0]);
+                 db('share')->where('sid',$list['sid'])->delete();
+             }
+         }
+
+    }
+
+    public function addShare(){      //新增分享文件
+        $add_data['userId']=Session::get('uinfo')['userId'];
+        $add_data['createtime']=date(date("Y-m-d H:i:s"));
+        function Recursion($id)
+        {
+            $list = db('folder')->where(['parentid' => $id, 'is_share' => 0])->select();
+            foreach ($list as $item) {
+                Recursion($item['folderid']);
+            }
+            db('folder')->where('folderid', $id)->update(['is_share' => 1]);
+            db('files')->where('folderid', $id)->update(['is_share' => 1]);
+        }
+        $arr=$_POST['arr'];
+        foreach($arr as $tmp){
+            if($tmp['type']==0){
+                $add_data['type']=$tmp['type'];
+                $add_data['id']=$tmp['id'];
+                Recursion($tmp['id']);
+                db('share')->insert($add_data);
+            }
+            else{
+                $add_data['type']=$tmp['type'];
+                $add_data['id']=$tmp['id'];
+                db('share')->insert($add_data);
+            }
+        }
+    }
 
     public function showfile()
     {     //展示文件
@@ -320,7 +372,7 @@ class Index extends Controller
                 $tmp = db('folder')->where('folderid', $value['id'])->select();
                 $tmp['createtime'] = $value['createtime'];
                 $tmp['id'] = $tmp['folderid'];
-                unset($tmp['folderid']);
+                unset($tmp['bid']);
                 $tmp['name'] = ['foldername'];
                 unset($tmp['foldername']);
                 $tmp['type'] = $value['type'];
@@ -330,7 +382,7 @@ class Index extends Controller
                 $tmp['createtime'] = $value['createtime'];
                 $tmp['type'] = $tmp['filetype'];
                 $tmp['name'] = $tmp['filename'];
-                $tmp['id'] = $tmp['fileid'];
+                $tmp['id'] = $tmp['bid'];
                 unset($tmp['filename']);
                 unset($tmp['fileid']);
                 unset($tmp['filetype']);
@@ -353,6 +405,8 @@ class Index extends Controller
 //        }
 //        echo json_encode($arr);
 //    }
+
+
 }
 
 
