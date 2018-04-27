@@ -16,16 +16,6 @@ class Index extends Controller
         } else return $this->redirect('login/login');
     }
 
-    public function share()
-    {
-        $add_data['userId'] = Session::get('uinfo')['userId'];
-        $add_data['createtime'] = date(date("Y-m-d H:i:s"));
-        $add_data['type'] = $_GET['type'];
-        $add_data['shareid'] = $_GET['id'];
-        db('share')->insert($add_data);
-
-    }
-
     public function showShare()
     {        //分享功能
         $arr = array();
@@ -140,7 +130,7 @@ class Index extends Controller
     public function search()
     {//查找功能
         $data = $_GET('search');
-        $list2 = db('files')->where(['userId' => Session::get('uinfo')['userId'], 'filename' => array('like', $data), 'is_recycle' => 0])->select();
+        $list2 = db('files')->where(['userId' => Session::get('uinfo')['userId'], 'filename' => array('like','%'. $data.'%'), 'is_recycle' => 0])->select();
         echo json_encode($list2);
     }
 

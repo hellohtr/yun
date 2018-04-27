@@ -357,7 +357,42 @@
             });
             }
         )
+
+        function getSearch() {
+            $('.tr').remove()
+            $('#time').text('创建时间')
+            $.get('search',{search:search },function (data){
+                data.forEach(function (value,index) {
+                    switch (value.filetype){
+                        case 1:var icon = '<div class="icons icons-image"></div>';break;
+                        case 2:var icon = '<div class="icons icons-documnet"></div>';break;
+                        case 3:var icon = '<div class="icons icons-music"></div>';break;
+                        case 4:var icon = '<div class="icons icons-video"></div>';break;
+                        case 5:var icon = '<div class="icons icons-other"></div>';break;
+                    }
+                    switch (value.filesize<1000?1:(value.filesize<1000*1000?2:3)){
+                        case 1:var size=value.filesize+'B';break;
+                        case 2:
+                            var num=(value.filesize/1000).toFixed(1);
+                            var size=num+'K';break;
+                        case 3:
+                            var num=(value.filesize/1000000).toFixed(1);
+                            var size=num+'M';break;
+                        case 4:
+                            var num=(value.filesize/1000000000).toFixed(1)
+                            var size=num+'G';break;
+                    }
+                    $('#file-table').append(' <tr class="tr file" id='+value.fileid+'>\n' +
+                        '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +value.filename+'</td>\n' +
+                        '                <td>'+size+'</td>\n' +
+                        '                <td>'+value.createtime+'</td>\n' +
+                        '            </tr>')
+                })
+            },'json');
+
+        }
     })
+
 
 </script>
 </body>
