@@ -16,7 +16,7 @@
         <i class="layui-icon">&#xe67c;</i>上传文件
         </button>
         <input type="file" id="uploadfile" hidden>
-
+        <button class="layui-btn layui-btn-normal layui-btn-sm" id="recycle" style="float: left;margin-left: 10px">还原</button>
         <button class="layui-btn layui-btn-primary layui-btn-sm" id="newFolder"> <i class="layui-icon">&#xe7a0;</i>新建文件夹</button>
         <div class="layui-btn-group">
             <button class="layui-btn layui-btn-primary layui-btn-sm" id="download"><i class="layui-icon" >&#xe61e;</i>下载</button>
@@ -108,6 +108,7 @@
             $('.layui-btn-group').show();
             $('#search').show()
             $('#upload').show()
+            $('#recycle').hide()
             $('#newFolder').hide()
             $('.search').show()
             $('#clearall').show()
@@ -169,6 +170,7 @@
             $('#upload').hide()
             $('#newFolder').hide()
             $('.search').hide()
+            $('#recycle').hide()
             $('#clearall').hide()
             $('.filelist').hide()
             $('.tr').remove()
@@ -211,6 +213,7 @@
             $('#upload').hide()
             $('#newFolder').hide()
             $('.search').hide()
+            $('#recycle').show()
             $('#clearall').show()
             $('.filelist').hide()
             $('.tr').remove()
