@@ -23,24 +23,18 @@ class Index extends Controller
         $listShare = db('share')->where('userId', $userId)->select();
         foreach ($listShare as $value) {
             if ($value['type'] == 0) {
-                $tmp = db('folder')->where('folderid', $value['id'])->select();
-                $tmp['createtime'] = $value['createtime'];
-                $tmp['id'] = $tmp['folderid'];
-                unset($tmp['folderid']);
-                $tmp['name'] = ['foldername'];
-                unset($tmp['foldername']);
-                $tmp['type'] = $value['type'];
-                array_push($arr, $tmp);
+                $tmp = db('folder')->where('folderid', $value['id'])->find();
+                $value['name']=$tmp['foldername'];
+                unset($value['id']);
+                array_push($arr, $value);
             } else {
-                $tmp = db('files')->where('fileid', $value['id'])->select();
-                $tmp['createtime'] = $value['createtime'];
-                $tmp['type'] = $tmp['filetype'];
-                $tmp['name'] = $tmp['filename'];
-                $tmp['id'] = $tmp['fileid'];
-                unset($tmp['filename']);
-                unset($tmp['fileid']);
-                unset($tmp['filetype']);
-                array_push($arr, $tmp);
+                $tmp = db('folder')->where('folderid', $value['id'])->find();
+                $value['name']=$tmp['foldername'];
+                $value['type']=$tmp['filetype'];
+                $value['size']=$tmp['filesize'];
+                unset($value['id']);
+                array_push($arr, $value);
+
             }
             json_encode($arr);
         }
