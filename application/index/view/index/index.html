@@ -21,14 +21,13 @@
         <div class="layui-btn-group">
             <button class="layui-btn layui-btn-primary layui-btn-sm" id="download"><i class="layui-icon" >&#xe61e;</i>下载</button>
             <button class="layui-btn layui-btn-primary layui-btn-sm" id="share"><i class="layui-icon">&#xe64c;</i>分享</button>
-            <button class="layui-btn layui-btn-primary layui-btn-sm" id="deleteAll"><i class="layui-icon">&#xe640;</i>删除</button>
+            <button class="layui-btn layui-btn-primary layui-btn-sm" id="delete"><i class="layui-icon">&#xe640;</i>删除</button>
             <button class="layui-btn layui-btn-primary layui-btn-sm" id="rename" >重命名</button>
-            <button class="layui-btn layui-btn-primary layui-btn-sm" id="copy">复制到</button>
-            <button class="layui-btn layui-btn-primary layui-btn-sm" id="remove">移动到</button>
+            
         </div>
         <div class="search" >
-        <div class="layui-input-inline"><input type="text" class=" layui-input " placeholder="搜索您的文件" ></div>
-        <i class="layui-icon" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
+        <div class="layui-input-inline"><input type="text" id="search-content" class=" layui-input " placeholder="搜索您的文件" ></div>
+        <i class="layui-icon " id="search" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
     </div>
         <button type="button" class="layui-btn   layui-btn-normal layui-btn-sm" id="clearall"  style="float: right;margin-right: 15px;margin-bottom: 5px">
             <i class="layui-icon">&#xe640;</i>清空回收站
@@ -52,10 +51,13 @@
             </tr>
             </thead>
         </table>
+
     </div>
 </div>
+
 <script>
     $(function(){
+        var names
         var layer
         layui.use('layer',function () {
             layer = layui.layer
@@ -109,9 +111,9 @@
             $('#search').show()
             $('#upload').show()
             $('#recycle').hide()
-            $('#newFolder').hide()
+            $('#newFolder').show()
             $('.search').show()
-            $('#clearall').show()
+            $('#clearall').hide()
             $('.filelist').hide()
             $('.tr').remove()
             $('#time').text('创建时间')
@@ -119,8 +121,8 @@
             history.replaceState({path:GetParam('path')},null,location.pathname + '?path='+id)
             $.get('showfolder',{path:id},function (data) {
                data.forEach(function (value, index) {
-                   $('#file-table').prepend(' <tr class="tr folder" id='+value.folderid+'>\n' +
-                       '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div><i class="layui-icon fileicon">&#xe622;</i>'+value.foldername+'</td>\n' +
+                   $('#file-table').prepend(' <tr class="tr folder" id='+value.folderid+' data-type="0">\n' +
+                       '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div><i class="layui-icon fileicon">&#xe622;</i><span class="name">'+value.foldername+'</span></td>\n' +
                        '                <td></td>\n' +
                        '                <td>'+value.createtime+'</td>\n' +
                        '            </tr>')
@@ -146,8 +148,8 @@
                                 var num=(value.filesize/1000000000).toFixed(1)
                                 var size=num+'G';break;
                         }
-                        $('#file-table').append(' <tr class="tr file" id='+value.fileid+'>\n' +
-                            '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +value.filename+'</td>\n' +
+                        $('#file-table').append(' <tr class="tr file" id='+value.fileid+' data-type='+value.filetype+'>\n' +
+                            '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +'<span class="name">'+value.filename+'</span></td>\n' +
                             '                <td>'+size+'</td>\n' +
                             '                <td>'+value.createtime+'</td>\n' +
                             '            </tr>')
@@ -155,15 +157,19 @@
                 },'json');
             },'json');
         }
-        if(!GetParam('path')&&!GetParam('type')){
+        if(!GetParam('path')&&!GetParam('type')&&!GetParam('search')){
 
             getData(0)
         }else if(GetParam('path')){
             getData(GetParam('path'))
         }
-        if(GetParam('type')){
+         if(GetParam('type')){
             getTypeData(GetParam('type'))
         }
+         if(GetParam('search')){
+            getSearch(GetParam('search'))
+        }
+
         function getTypeData(type) {
             $('.layui-btn-group').show();
             $('#search').hide()
@@ -199,7 +205,7 @@
                                 var size=num+'G';break;
                         }
                         $('#file-table').append(' <tr class="tr file" id='+value.fileid+'>\n' +
-                            '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +value.filename+'</td>\n' +
+                            '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +'<span class="name">'+value.filename+'</span></td>\n' +
                             '                <td>'+size+'</td>\n' +
                             '                <td>'+value.createtime+'</td>\n' +
                             '            </tr>')
@@ -244,7 +250,7 @@
                     else var size=''
 
                     $('#file-table').prepend(' <tr class="tr" id='+value.bid+' data-type='+value.type+'>\n' +
-                        '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +value.name+'</td>\n' +
+                        '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +'<span class="name">'+value.name+'</span></td>\n' +
                         '                <td>'+size+'</td>\n' +
                         '                <td>'+value.createtime+'</td>\n' +
                         '            </tr>')
@@ -276,14 +282,61 @@
         $('.bintable').click(function () {
             getBin()
         })
+        $('#search').click(function () {
+            var search=$('#search-content').val()
+            getSearch(search)
+        })
+        $('#rename').click(function () {
+            if($('#inputfilename').length > 0){
+                return
+            }
+            if($('.layui-form-checked').length==1){
+                 names=$('.layui-form-checked').parent().children('span').text()
+                $('.layui-form-checked').parent().children('span').html('<input type="text" name="filename" id="inputfilename" value='+names+'>\n' +
+                    '<span class="nameconfirm btn-folder"><i class="layui-icon">&#xe605;</i></span>\n' +
+                    '<span class="namecancel btn-folder"><i class="layui-icon">&#x1006;</i></span>')
 
+            }
+        })
+        //重命名确认
+        $('#file-table').delegate('.nameconfirm','click',function (ev) {
+            var name= $('#inputfilename').val()
+            var arr=Array()
+            arr.push({
+                type:$(this).parent().parent().parent().attr('data-type'),
+                id:$(this).parent().parent().parent().attr('id'),
+                name:name,
+
+            })
+            $('#name').html(name)
+            $.post('rename',{arr:arr },function (data){
+                if (data.code==0){
+                    layer.msg('文件名已存在！')
+                    return
+                }
+                else $('.layui-form-checked').parent().children('span').html(name)
+            })
+            ev.stopPropagation()
+        })
+
+        $('#file-table').delegate('.namecancel','click',function (ev) {
+            $(this).parent().html(names)
+            ev.stopPropagation()
+
+        })
+        $('#file-table').delegate('#inputfilename','click',function (ev) {
+            ev.stopPropagation()
+        })
         //监听历史回退
         window.addEventListener('popstate', function (e) {
             if(e.state.path){
                 getData(e.state.path)
-            }else{
+            }else if(e.state.type) {
                 getTypeData(e.state.type)
+            }else{
+                getSearch(e.state.search)
             }
+
         });
 
         //点击上传按钮
@@ -323,11 +376,14 @@
         //双击打开文件夹
         $('#file-table').delegate('tr.folder','dblclick',function(){
             getData(this.id)
-            history.pushState({path:GetParam('path')},null,location.pathname + '?path='+GetParam('path'))
+            history.pushState({path:GetParam('path')},null,location.pathname + '?search='+GetParam('path'))
         })
 
         //单击选择或取消选择
-        $('#file-table').delegate('.tr','click',function(){
+        $('#file-table').delegate('.tr','click',function(ev){
+            if($('#inputfilename').length>0){
+                return
+            }
             if($(this).find('.layui-form-checkbox').hasClass('layui-form-checked')){
                 $(this).find('.layui-form-checkbox').removeClass('layui-form-checked')
             }else{
@@ -335,7 +391,9 @@
             }
 
         })
-        $('#deleteAll').click(function () {
+
+        //还原文件
+        $('#recycle').click(function () {
             var arr = []
             $('.layui-form-checkbox').each(function () {
                 if($(this).hasClass('layui-form-checked')){
@@ -352,35 +410,80 @@
                     }
                 }
             })
-            $.post('Delete',{arr:arr},function (data) {
-                getData(GetParam('path'))
+            $.post('restore',{arr:arr},function (data) {
+                getBin()
             });
         })
-        $('#rename').click(function () {        //重命名
+
+        $('#clearall').click(function () {
+
+            $.post('deleteAll',function (data) {
+                getBin()
+            });
+        })
+        
+        $('#delete').click(function () {
             var arr = []
-            if($('.layui-form-checked').parent().parent().hasClass('folder')){
-                arr.push({
-                    id:$('.layui-form-checked').parent().parent().attr('id'),
-                    type:0
-                })
+            $('.layui-form-checkbox').each(function () {
+                if($(this).hasClass('layui-form-checked')){
+                    if($(this).parent().parent().hasClass('folder')){
+                        arr.push({
+                            id: $(this).parent().parent().attr('id'),
+                            type: 0
+                        })
+                    }else{
+                        arr.push({
+                            id: $(this).parent().parent().attr('id'),
+                            type: 1
+                        })
+                    }
+                }
+            })
+            if(arr==null){
+                return
             }
             else{
-                arr.push({
-                    id:$('.layui-form-checked').parent().parent().attr('id'),
-                    name:'hejdjfs',
-                    parentid:GetParam('path'),
-                    type:1
-                })
-                }
-            $.post('rename',{arr:arr},function (data) {
-                getData(GetParam('path'))
-            });
+                $.post('Delete',{arr:arr},function (data) {
+                    location.reload()
+                });
             }
-        )
 
-        function getSearch() {
+        })
+
+
+        function openDownloadDialog(url, saveName)
+        {
+            if(typeof url == 'object' && url instanceof Blob)
+            {
+                url = URL.createObjectURL(url); // 创建blob地址
+            }
+            var aLink = document.createElement('a');
+            aLink.href = url;
+            aLink.target = "_blank";
+            aLink.download = saveName || ''; // HTML5新增的属性，指定保存文件名，可以不要后缀，注意，file:///模式下不会生效
+            var event;
+            if(window.MouseEvent) event = new MouseEvent('click');
+            else
+            {
+                event = document.createEvent('MouseEvents');
+                event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            }
+            aLink.dispatchEvent(event);
+        }
+
+        function getSearch(search) {
             $('.tr').remove()
             $('#time').text('创建时间')
+            $('.layui-btn-group').show();
+            $('#search').hide()
+            $('#upload').hide()
+            $('#newFolder').hide()
+            $('#search').show()
+            $('#recycle').hide()
+            $('#clearall').hide()
+            $('.filelist').hide()
+            $('.tr').remove()
+            history.replaceState({search:search},null,location.pathname + '?search='+search)
             $.get('search',{search:search },function (data){
                 data.forEach(function (value,index) {
                     switch (value.filetype){
@@ -411,6 +514,31 @@
             },'json');
 
         }
+
+        $('#download').click(function () {
+            if($('.layui-form-checked').length==1) {
+                if ($('.layui-form-checked').parent().parent().attr('data-type') != 0) {
+                    $.get('download',{id:$('.layui-form-checked').parent().parent().attr('id')},function (data) {
+                        openDownloadDialog('../../'+data.url,data.name)
+                    },'json')
+                }
+                else {
+                    layer.msg("不支持下载文件夹")
+                }
+            }
+            else if($('.layui-form-checked').length>1){
+                layer.msg("不支持多文件下载")
+
+            }
+
+
+
+        })
+
+
+
+
+
     })
 
 

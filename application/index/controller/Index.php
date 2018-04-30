@@ -123,26 +123,42 @@ class Index extends Controller
 
     public function search()
     {//查找功能
-        $data = $_GET('search');
+        $data = $_GET['search'];
         $list2 = db('files')->where(['userId' => Session::get('uinfo')['userId'], 'filename' => array('like','%'. $data.'%'), 'is_recycle' => 0])->select();
         echo json_encode($list2);
     }
 
     public function rename()
     {       //重命名
-        $type = $_POST['arr']['type'];
-        $name = $_POST['arr']['name'];
-        $id = $_POST['arr']['id'];
-        $parentid = $_POST['arr']['parentid'];
+        $arr=$_POST['arr'];
+        $type = $arr[0]['type'];
+        $name = $arr[0]['name'];
+        $id = $arr[0]['id'];
         $userId = Session::get('uinfo')['userId'];
         if ($type == 0) {
-            $list = db('folder')->where(['userId' => $userId, 'parentid' => $parentid, 'foldername' => $name, 'is_recycle' => 0])->select();
-            if ($list == null) {
+            $tmp=db('folder')->where('folderid',$id)->find();
+
+            $list = db('folder')->where(['userId' => $userId, 'parentid' => $tmp['parentid'], 'foldername' => $name, 'is_recycle' => 0])->find();
+            if ($list == null ) {
                 db('folder')->where(['userId' => $userId, 'folderid' => $id])->data(['foldername' => $name])->update();
-                $this->success('重命名成功', 'index/index.html?path=' . $parentid);
-            } else $this->error('文件夹名已存在', 'index/index.html?path=' . $parentid);
+                $this->success('重命名成功');
+            } elseif ($list['folderid']==$id){
+                db('folder')->where(['userId' => $userId, 'folderid' => $id])->data(['foldername' => $name])->update();
+                $this->success('重命名成功');
+            }else $this->error('文件夹名已存在');
         } else {
-            db('files')->where(['userId' => $userId, 'fileid' => $id])->data(['filename' => $name])->update();
+            $tmp=db('files')->where('fileid',$id)->find();
+            $list=db('files')->where(['folderid'=>$tmp['folderid'],'filename'=>$name])->find();
+            if($list==null or $list['fileid']==$id){
+                db('files')->where(['userId' => $userId, 'fileid' => $id])->data(['filename' => $name])->update();
+                $this->success('重命名成功');
+            }elseif ($list['fileid']==$id){
+                db('files')->where(['userId' => $userId, 'fileid' => $id])->data(['filename' => $name])->update();
+                $this->success('重命名成功');
+            }
+            else {
+                    $this->error('文件名已存在');
+                }
         }
     }
 
@@ -196,14 +212,16 @@ class Index extends Controller
 
     public function download()
     { //下载
-        $fileid = $_GET('fileid');
-        $list = db('files')->where('fileid', $fileid)->select();
-        $filename = $list['path'];
+        $fileid = $_GET['id'];
+        $list = db('files')->where('fileid', $fileid)->find();
+        $filename = $list['filepath'];
         $basename = $list['filename'];
-        header("Content-Type:image/png");
-        header("Content-Disposition:attachment;filename=" . $basename['basename']);
-        header("Content-Length:" . $list['filesize']);
-        readfile($filename);
+
+//        header("Content-Type:image/png");
+//        header("Content-Disposition:attachment;filename=" . $basename);
+//        header("Content-Length:" . $list['filesize']);
+//        echo file_get_contents($filename);
+        echo json_encode(['url'=>$filename,'name'=>$basename]);
     }
 
     public function showfolder()
@@ -297,25 +315,31 @@ class Index extends Controller
 
     public function restore()
     {   //从回收站还原信息
-        $id = $_POST['id'];
-        $type = $_POST['type'];
-        $userId = Session::get('uinfo')['userId'];
+        $arr = $_POST['arr'];
         function Recursion($id)
         {
-            $list = db('folder')->where(['parentid' => $id, 'is_recycle' => 1])->select();
+            $list = db('folder')->where(['parentid' => $id,'is_recycle' => 1])->select();
             foreach ($list as $item) {
                 Recursion($item['folderid']);
             }
             db('folder')->where('folderid', $id)->update(['is_recycle' => 0]);
             db('files')->where('folderid', $id)->update(['is_recycle' => 0]);
         }
-
-        if ($type == 0) {
-            Recursion($id);
-        } else {
-            db('fileid')->where(['userId' => $userId, 'fileid' => 'id'])->update(['is_recycle' => 0]);
+        foreach ($arr as $value){
+            $tmp=db('bin')->where('bid',$value['id'])->find();
+            if($tmp['type']==0){
+                Recursion($tmp['id']);
+                db('bin')->where('bid',$value['id'])->delete();
+            }
+            else{
+                db('files')->where('fileid',$tmp['id'])->update(['is_recycle' => 0]);
+                db('bin')->where('bid',$value['id'])->delete();
+            }
         }
-        db('bin')->where(['userId' => $userId, 'type' => $type, 'bid' => $id])->delete();
+
+    }
+    public function foldershow(){
+        return $this->fetch();
     }
 
     public function deleteAll()

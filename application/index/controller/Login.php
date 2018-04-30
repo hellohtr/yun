@@ -56,6 +56,7 @@ class Login extends Controller{
     }
 
     public function dologin(){
+
         $username  = input('username');
         $password  = md5(input('password').$this->salt);
         //查询用户表有没有这些信息的用户
