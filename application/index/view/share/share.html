@@ -18,6 +18,132 @@
     </div>
 </div>
 <script>
+    $(function(){
+        var layer
+        layui.use('layer',function () {
+            layer = layui.layer
+        })
+
+        function Show(path,type) {
+            $('.tr').remove()
+            history.replaceState({path:GetParam('path'),type:GetParam('type')},null,location.pathname + '?path='+path+'&type='+type)
+            $.post('Show',{path:path, type:type},function (data) {
+                data.forEach(function (value) {
+                    switch (value.type){
+                        case 0:var icon='<i class="layui-icon fileicon">&#xe622;</i>';break;
+                        case 1:var icon = '<div class="icons icons-image"></div>';break;
+                        case 2:var icon = '<div class="icons icons-documnet"></div>';break;
+                        case 3:var icon = '<div class="icons icons-music"></div>';break;
+                        case 4:var icon = '<div class="icons icons-video"></div>';break;
+                        case 5:var icon = '<div class="icons icons-other"></div>';break;
+                    }
+                    if(value.hasOwnProperty('size')) {
+                        switch (value.size < 1000 ? 1 : (value.size < 1000 * 1000 ? 2 : 3)) {
+                            case 1:
+                                var size = value.size + 'B';
+                                break;
+                            case 2:
+                                var num = (value.size / 1000).toFixed(1);
+                                var size = num + 'K';
+                                break;
+                            case 3:
+                                var num = (value.size / 1000000).toFixed(1);
+                                var size = num + 'M';
+                                break;
+                            case 4:
+                                var num = (value.size / 1000000000).toFixed(1)
+                                var size = num + 'G';
+                                break;
+                        }
+                    }else {
+                        var size=''
+                    }
+                    $('#file-table').append(' <tr class="tr " id='+value.id+' data-type='+value.type+'>\n' +
+                        '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +'<span class="name">'+value.name+'</span></td>\n' +
+                        '                <td>'+size+'</td>\n' +
+                        '                <td>'+value.createtime+'</td>\n' +
+                        '            </tr>')
+                })
+            },'json')
+        }
+
+        function GetParam (name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i")
+            var r = window.location.search.substr(1).match(reg)
+            if (r != null){
+                return decodeURI(r[2])
+            }else{
+                return null
+            }
+        }
+        var path=GetParam('path')
+        var type=GetParam('type')
+        Show(path,type)
+
+        $('#file-table').delegate('.tr','dblclick',function(){
+            if($(this).attr('data-type')==0){
+                var path= $(this).attr('id')
+                var type= $(this).attr('data-type')
+                Show(path,type)
+                history.pushState({path:GetParam('path'),type:GetParam('type')},null,location.pathname + '?path='+GetParam('path'+'&&type='+GetParam('type')))
+            }
+            else return
+
+        })
+
+        $('#file-table').delegate('.tr','click',function(ev){
+            if($(this).find('.layui-form-checkbox').hasClass('layui-form-checked')){
+                $(this).find('.layui-form-checkbox').removeClass('layui-form-checked')
+            }else{
+                $(this).find('.layui-form-checkbox').addClass('layui-form-checked')
+            }
+
+        })
+
+        function openDownloadDialog(url, saveName)
+        {
+            if(typeof url == 'object' && url instanceof Blob)
+            {
+                url = URL.createObjectURL(url); // 创建blob地址
+            }
+            var aLink = document.createElement('a');
+            aLink.href = url;
+            aLink.target = "_blank";
+            aLink.download = saveName || ''; // HTML5新增的属性，指定保存文件名，可以不要后缀，注意，file:///模式下不会生效
+            var event;
+            if(window.MouseEvent) event = new MouseEvent('click');
+            else
+            {
+                event = document.createEvent('MouseEvents');
+                event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            }
+            aLink.dispatchEvent(event);
+        }
+
+        $('#download').click(function () {
+            if($('.layui-form-checked').length==1) {
+                if ($('.layui-form-checked').parent().parent().attr('data-type') != 0) {
+                    $.get('download',{id:$('.layui-form-checked').parent().parent().attr('id')},function (data) {
+                        openDownloadDialog('../../'+data.url,data.name)
+                    },'json')
+                }
+                else {
+                    layer.msg("不支持下载文件夹")
+                }
+            }
+            else if($('.layui-form-checked').length>1){
+                layer.msg("不支持多文件下载")
+            }
+        })
+
+        //监听历史回退
+        window.addEventListener('popstate', function (e) {
+            if(e.state.path&&e.state.type){
+                Show(e.state.path,e.state.type)
+            }
+        });
+
+    })
 
 </script>
 </body>

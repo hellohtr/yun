@@ -7,8 +7,8 @@
     <li class="layui-nav-item type-music" data-type="3"><a href="javascript:;">音乐</a></li>
     <li class="layui-nav-item type-video" data-type="4"><a href="javascript:;">视频</a></li>
     <li class="layui-nav-item type-other" data-type="5"><a href="javascript:;">其他</a></li>
-    <li class="layui-nav-item sharetable"><a href="javascript:;">我的分享</a></li>
-    <li class="layui-nav-item bintable"><a href="javascript:;">回收站</a></li>
+    <li class="layui-nav-item sharetable" data-type="share"><a href="javascript:;">我的分享</a></li>
+    <li class="layui-nav-item bintable" data-type="bin"><a href="javascript:;">回收站</a></li>
 </ul>
 <div class="container">
     <div class="container-top">
@@ -16,6 +16,7 @@
         <i class="layui-icon">&#xe67c;</i>上传文件
         </button>
         <input type="file" id="uploadfile" hidden>
+        <button class="layui-btn layui-btn-normal layui-btn-sm" id="cannelShare" style="float: left;margin-left: 10px;margin-bottom: 5px">取消分享</button>
         <button class="layui-btn layui-btn-normal layui-btn-sm" id="recycle" style="float: left;margin-left: 10px">还原</button>
         <button class="layui-btn layui-btn-primary layui-btn-sm" id="newFolder"> <i class="layui-icon">&#xe7a0;</i>新建文件夹</button>
         <div class="layui-btn-group">
@@ -108,6 +109,7 @@
         function getData(id) {
             $('.tr').remove()
             $('.layui-btn-group').show();
+            $('#cannelShare').hide()
             $('#search').show()
             $('#upload').show()
             $('#recycle').hide()
@@ -157,17 +159,22 @@
                 },'json');
             },'json');
         }
-        if(!GetParam('path')&&!GetParam('type')&&!GetParam('search')){
+        if(!GetParam('path')&&!GetParam('type')&&!GetParam('search')&&!GetParam('bin')&&!GetParam('share')){
 
             getData(0)
         }else if(GetParam('path')){
             getData(GetParam('path'))
         }
-         if(GetParam('type')){
+         else if(GetParam('type')){
             getTypeData(GetParam('type'))
         }
-         if(GetParam('search')){
+        else if(GetParam('search')){
             getSearch(GetParam('search'))
+        }
+        else if(GetParam('bin')){
+            getBin()
+        }else if(GetParam('share')){
+            showShare()
         }
 
         function getTypeData(type) {
@@ -175,6 +182,7 @@
             $('#search').hide()
             $('#upload').hide()
             $('#newFolder').hide()
+            $('#cannelShare').hide()
             $('.search').hide()
             $('#recycle').hide()
             $('#clearall').hide()
@@ -182,7 +190,7 @@
             $('.tr').remove()
             $('#time').text('创建时间')
             $('.layui-nav').find('li[data-type='+type+']').addClass('menu-active').siblings().removeClass('menu-active')
-            history.replaceState({type:GetParam('type')},null,location.pathname + '?type='+type)
+            history.replaceState({type:type},null,location.pathname + '?type='+type)
                 $.get('showtype',{type:type},function (data){
                     data.forEach(function (value,index) {
                         switch (value.filetype){
@@ -204,7 +212,7 @@
                                 var num=(value.filesize/1000000000).toFixed(1)
                                 var size=num+'G';break;
                         }
-                        $('#file-table').append(' <tr class="tr file" id='+value.fileid+'>\n' +
+                        $('#file-table').append(' <tr class="tr file" id='+value.fileid+' data-type='+value.filetype+'>\n' +
                             '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +'<span class="name">'+value.filename+'</span></td>\n' +
                             '                <td>'+size+'</td>\n' +
                             '                <td>'+value.createtime+'</td>\n' +
@@ -218,11 +226,14 @@
             $('#search').hide()
             $('#upload').hide()
             $('#newFolder').hide()
+            $('#cannelShare').hide()
             $('.search').hide()
             $('#recycle').show()
             $('#clearall').show()
             $('.filelist').hide()
             $('.tr').remove()
+            $('.layui-nav').find('li[data-type="bin"]').addClass('menu-active').siblings().removeClass('menu-active')
+            history.replaceState({bin:'bin'},null,location.pathname + '?bin=bin')
             $.get('showBin',function (data){
                 data.forEach(function (value,index) {
                     switch (value.type){
@@ -259,32 +270,42 @@
         }
         $('.type-all').click(function () {
             getData(0)
+            history.pushState({path:GetParam('path')},null,location.pathname + '?path='+GetParam('0'))
         })
         $('.type-document').click(function () {
             getTypeData(2)
+            history.pushState({type:GetParam('type')},null,location.pathname + '?type='+GetParam('type'))
         })
         $('.type-image').click(function () {
             getTypeData(1)
+            history.pushState({type:GetParam('type')},null,location.pathname + '?type='+GetParam('type'))
         })
         $('.type-music').click(function () {
             getTypeData(3)
+            history.pushState({type:GetParam('type')},null,location.pathname + '?type='+GetParam('type'))
         })
         $('.type-video').click(function () {
             getTypeData(4)
+            history.pushState({type:GetParam('type')},null,location.pathname + '?type='+GetParam('type'))
         })
         $('.type-other').click(function () {
             getTypeData(5)
+            history.pushState({type:GetParam('type')},null,location.pathname + '?type='+GetParam('type'))
         })
-        $('.item_title').click(function () {
-
-            getData(0)
-        })
+        // $('.item_title').click(function () {
+        //     getData(0)
+        //     history.pushState({path:GetParam('path')},null,location.pathname + '?path='+GetParam('path'))
+        // })
         $('.bintable').click(function () {
             getBin()
+            history.pushState({bin:'bin'},null,location.pathname + '?bin=bin')
+
         })
         $('#search').click(function () {
             var search=$('#search-content').val()
+
             getSearch(search)
+            history.replaceState({search:GetParam('search')},null,location.pathname + '?search='+search)
         })
         $('#rename').click(function () {
             if($('#inputfilename').length > 0){
@@ -333,10 +354,14 @@
                 getData(e.state.path)
             }else if(e.state.type) {
                 getTypeData(e.state.type)
-            }else{
+            }else if(e.state.search){
                 getSearch(e.state.search)
+            }else if(e.state.bin){
+                getBin()
+            }else if(e.state.share){
+                showShare()
             }
-
+            console.log(e.state)
         });
 
         //点击上传按钮
@@ -386,8 +411,10 @@
             }
             if($(this).find('.layui-form-checkbox').hasClass('layui-form-checked')){
                 $(this).find('.layui-form-checkbox').removeClass('layui-form-checked')
+                $(this).find('.url').hide()
             }else{
                 $(this).find('.layui-form-checkbox').addClass('layui-form-checked')
+                $(this).find('.url').show()
             }
 
         })
@@ -398,10 +425,7 @@
             $('.layui-form-checkbox').each(function () {
                 if($(this).hasClass('layui-form-checked')){
                     if($(this).parent().parent().hasClass('folder')){
-                        arr.push({
-                            id: $(this).parent().parent().attr('id'),
-                            type: 0
-                        })
+                        
                     }else{
                         arr.push({
                             id: $(this).parent().parent().attr('id'),
@@ -412,6 +436,8 @@
             })
             $.post('restore',{arr:arr},function (data) {
                 getBin()
+                history.pushState({bin:'bin'},null,location.pathname + '?bin=bin')
+
             });
         })
 
@@ -419,6 +445,7 @@
 
             $.post('deleteAll',function (data) {
                 getBin()
+                history.pushState({bin:'bin'},null,location.pathname + '?bin=bin')
             });
         })
         
@@ -447,10 +474,7 @@
                     location.reload()
                 });
             }
-
         })
-
-
         function openDownloadDialog(url, saveName)
         {
             if(typeof url == 'object' && url instanceof Blob)
@@ -470,7 +494,6 @@
             }
             aLink.dispatchEvent(event);
         }
-
         function getSearch(search) {
             $('.tr').remove()
             $('#time').text('创建时间')
@@ -514,7 +537,6 @@
             },'json');
 
         }
-
         $('#download').click(function () {
             if($('.layui-form-checked').length==1) {
                 if ($('.layui-form-checked').parent().parent().attr('data-type') != 0) {
@@ -528,20 +550,112 @@
             }
             else if($('.layui-form-checked').length>1){
                 layer.msg("不支持多文件下载")
-
             }
+        })
+        $('#share').click(function () {
+            var arr = []
+            if($('.layui-form-checked').length==1) {
 
+                    if($('.layui-form-checked').parent().parent().hasClass('folder')){
+                        arr.push({
+                            id: $('.layui-form-checked').parent().parent().attr('id'),
+                            type: 0
+                        })
+                    }else{
+                        arr.push({
+                            id: $('.layui-form-checked').parent().parent().attr('id'),
+                            type: 1
+                        })
+                    }
+            }else if($('.layui-form-checked').length>1){
+                        layer.msg("暂不支持多个文件同时分享")
+        }
+            if(arr==null){
+                return
+            }
+            else{
+                $.post('addShare',{arr:arr},function (data) {
 
+                },'json');
+            }
+        })
 
+        function showShare() {
+            $('.layui-btn-group').hide();
+            $('#search').hide()
+            $('#upload').hide()
+            $('#cannelShare').show()
+            $('#newFolder').hide()
+            $('.search').hide()
+            $('#recycle').hide()
+            $('#clearall').hide()
+            $('.filelist').hide()
+            $('.tr').remove()
+            $('.layui-nav').find('li[data-type="share"]').addClass('menu-active').siblings().removeClass('menu-active')
+            history.replaceState({share:'share'},null,location.pathname + '?share=share')
+            $.get('showShare',function (data){
+                data.forEach(function (value) {
+                    switch (value.type){
+                        case 0:var icon='<i class="layui-icon fileicon">&#xe622;</i>';break;
+                        case 1:var icon = '<div class="icons icons-image"></div>';break;
+                        case 2:var icon = '<div class="icons icons-documnet"></div>';break;
+                        case 3:var icon = '<div class="icons icons-music"></div>';break;
+                        case 4:var icon = '<div class="icons icons-video"></div>';break;
+                        case 5:var icon = '<div class="icons icons-other"></div>';break;
+                    }
+                    if(value.hasOwnProperty('filesize')){
+                        switch (value.filesize<1000?1:(value.filesize<1000*1000?2:3)){
+                            case 1:var size=value.filesize+'B';break;
+                            case 2:
+                                var num=(value.filesize/1000).toFixed(1);
+                                var size=num+'K';break;
+                            case 3:
+                                var num=(value.filesize/1000000).toFixed(1);
+                                var size=num+'M';break;
+                            case 4:
+                                var num=(value.filesize/1000000000).toFixed(1)
+                                var size=num+'G';break;
+                        }
+                    }
+                    else var size=''
+                    var url='http://'+location.host+"/yun/public/index/share/share?path="+value.id+"&&type="+value.type
+
+                    $('#file-table').prepend(' <tr class="tr" id='+value.sid+' data-type='+value.type+'>\n' +
+                        '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +'<span class="name">'+value.name+'</span>' +
+                        '<div class="url" style="display: none"><br><span>链接 ：<a href='+url+'>'+url+'</a></span></div></td>\n' +
+                        '                <td>'+size+'</td>\n' +
+                        '                <td>'+value.createtime+'</td>\n' +
+                        '            </tr>')
+                })
+            },'json');
+        }
+        $('.sharetable').click(function () {
+            showShare()
+            history.pushState({share:'share'},null,location.pathname + '?share=share')
+        })
+        $('#cannelShare').click(function () {
+            var arr = []
+            $('.layui-form-checkbox').each(function () {
+                if($(this).hasClass('layui-form-checked')){
+                   var type= $(this).parent().parent().attr('data-type')
+                    var id=$(this).parent().parent().attr('id')
+                    arr.push({
+                        id: id,
+                        type: type
+                    })
+                }
+            })
+            $.post('deleteShare',{arr:arr},function () {
+                location.reload()
+            })
         })
 
 
 
 
 
+
     })
-
-
 </script>
 </body>
 </html>

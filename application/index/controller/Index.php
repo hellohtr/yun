@@ -23,21 +23,26 @@ class Index extends Controller
         $listShare = db('share')->where('userId', $userId)->select();
         foreach ($listShare as $value) {
             if ($value['type'] == 0) {
-                $tmp = db('folder')->where('folderid', $value['id'])->find();
-                $value['name']=$tmp['foldername'];
-                unset($value['id']);
-                array_push($arr, $value);
-            } else {
-                $tmp = db('folder')->where('folderid', $value['id'])->find();
-                $value['name']=$tmp['foldername'];
-                $value['type']=$tmp['filetype'];
-                $value['size']=$tmp['filesize'];
-                unset($value['id']);
-                array_push($arr, $value);
+                $tmp = db('folder')->where(['folderid'=>$value['id'],'is_recycle'=>0])->find();
+                if($tmp) {
+                    $value['name'] = $tmp['foldername'];
+                    $value['type'] = 0;
+                    array_push($arr, $value);
+                }
+            }
+            else {
+                $tmp = db('files')->where(['fileid'=>$value['id'],'is_recycle'=>0])->find();
+                if($tmp) {
+                    $value['name'] = $tmp['filename'];
+                    $value['type'] = $tmp['filetype'];
+                    $value['filesize'] = $tmp['filesize'];
+                    array_push($arr, $value);
+                }
 
             }
-            json_encode($arr);
+
         }
+        echo json_encode($arr);
     }
 
     public function createFolder()
@@ -245,15 +250,14 @@ class Index extends Controller
             db('folder')->where('folderid', $id)->update(['is_share' => 0]);
             db('files')->where('folderid', $id)->update(['is_share' => 0]);
         }
-         $userId=Session::get('uinfo')['userId'];
          foreach ($data as $tmp){
-             $list=db('share')->where(['sid'=>$data['sid'],'userId'=>$userId])->select();
-             if($list['type']==0){
-                 Recursion($list['sid']);
-                 db('share')->where('sid',$list['sid'])->delete();
+             $list=db('share')->where('sid',$tmp['id'])->find();
+             if($tmp['type']==0){
+                 Recursion($list['id']);
+                 db('share')->where('sid',$tmp['id'])->delete();
              }else {
                  db('files')->where('fileid',$list['id'])->update(['is_share' => 0]);
-                 db('share')->where('sid',$list['sid'])->delete();
+                 db('share')->where('sid',$tmp['id'])->delete();
              }
          }
 
@@ -283,6 +287,7 @@ class Index extends Controller
                 $add_data['type']=$tmp['type'];
                 $add_data['id']=$tmp['id'];
                 db('share')->insert($add_data);
+                db('files')->where('folderid',$tmp['id'])->update(['is_share' => 1]);
             }
         }
     }
@@ -338,9 +343,6 @@ class Index extends Controller
         }
 
     }
-    public function foldershow(){
-        return $this->fetch();
-    }
 
     public function deleteAll()
     {   //清空回收站
@@ -381,7 +383,6 @@ class Index extends Controller
                 $value['name']=$tmp['foldername'];
                 unset($value['id']);
                 array_push($arr, $value);
-
             } else {
                 $tmp = db('files')->where('fileid', $value['id'])->find();
                 $value['name']=$tmp['filename'];
@@ -390,10 +391,10 @@ class Index extends Controller
                 unset($value['id']);
                array_push($arr, $value);
             }
-
         }
         echo json_encode($arr);
     }
+
 
 
 
