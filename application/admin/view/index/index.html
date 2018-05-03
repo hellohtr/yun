@@ -2,17 +2,17 @@
 
 <ul class="layui-nav layui-nav-tree" lay-filter="test" style="height: 100%;position:absolute;top: 0;padding-top: 60px"
     id="menu">
-    <li class="layui-nav-item type-all" data-type="0"><a href="javascript:;">管理用户</a></li>
-    <li class="layui-nav-item type-image" data-type="1"><a href="javascript:;">管理文件</a></li>
-    <li class="layui-nav-item type-document" data-type="2"><a href="javascript:;">管理分享</a></li>
+    <li class="layui-nav-item manageUser" ><a href="javascript:;">管理用户</a></li>
+    <li class="layui-nav-item manageFile"><a href="javascript:;">管理文件</a></li>
+    <li class="layui-nav-item manageShare"><a href="javascript:;">管理分享</a></li>
 
 
 </ul>
 <div class="container">
     <div class="container-top">
-        <button type="button" class="layui-btn   layui-btn-normal layui-btn-sm" id="upload">
-            <i class="layui-icon">&#xe67c;</i>上传文件
-        </button>
+        <!--<button type="button" class="layui-btn   layui-btn-normal layui-btn-sm" id="upload">-->
+            <!--<i class="layui-icon">&#xe67c;</i>上传文件-->
+        <!--</button>-->
 
         <!--<div class="search" >-->
 
@@ -24,39 +24,40 @@
         <!--<i class="layui-icon " id="search2" style="float:right;color:#999;margin-right:10px">&#xe615;</i>-->
         <!--</div>-->
         <div style="">
-            <select name="city" lay-verify="required" >
+
+            <div class="search" style="margin-bottom: 5px">
+                <div class="layui-input-inline"><input type="text" id="searchS" class=" layui-input " placeholder="搜索您的文件"></div>
+                <i class="layui-icon " id="search" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
+            </div>
+            <select name="city" lay-verify="required" style="float: right;height: 31px ;margin-right: 5px" >
                 <option value="0">用户名</option>
                 <option value="1">文件名</option>
             </select>
-            <div class="search3">
-                <div class="layui-input-inline"><input type="text" id="searchS" class=" layui-input " placeholder="搜索您的文件"></div>
-                <i class="layui-icon " id="search3" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
-            </div>
         </div>
     </div>
     <div class="container-table">
         <table class="layui-table"  id="show-table">
-            <thead>
-            <tr class="tr">
-                <th >分享ID</th>
-                <th  >文件名</th>
-                <th >所属用户</th>
-                <th>文件大小</th>
-                <th>创建时间</th>
-                <th>操作</th>
-            </tr>
-            </thead>
-            <tr class="tr">
-                <td contenteditable="false" >232123423</td>
-                <td class="age" contenteditable="true" >34545345</td>
-                <td class="sex" contenteditable="true">3423434</td>
-                <td class="phone" ><div class="icons icons-documnet"></div><span contenteditable="true">23432432</span></td>
-                <td class="mail" contenteditable="true">3432432</td>
-                <td>
-                    <button  class="layui-btn layui-btn-normal layui-btn-sm modify">修改</button>
-                    <button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>
-                </td>
-            </tr>
+            <!--<thead>-->
+            <!--<tr class="tr">-->
+                <!--<th >分享ID</th>-->
+                <!--<th  >文件名</th>-->
+                <!--<th >所属用户</th>-->
+                <!--<th>文件大小</th>-->
+                <!--<th>创建时间</th>-->
+                <!--<th>操作</th>-->
+            <!--</tr>-->
+            <!--</thead>-->
+            <!--<tr class="tr">-->
+                <!--<td contenteditable="false" >232123423</td>-->
+                <!--<td class="age" contenteditable="true" >34545345</td>-->
+                <!--<td class="sex" contenteditable="true">3423434</td>-->
+                <!--<td class="phone" ><div class="icons icons-documnet"></div><span contenteditable="true">23432432</span></td>-->
+                <!--<td class="mail" contenteditable="true">3432432</td>-->
+                <!--<td>-->
+                    <!--<button  class="layui-btn layui-btn-normal layui-btn-sm modify">修改</button>-->
+                    <!--<button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>-->
+                <!--</td>-->
+            <!--</tr>-->
         </table>
 
     </div>
@@ -85,18 +86,18 @@
                         '                <td class="phone" contenteditable="true">'+value.phone+'</td>\n' +
                         '                <td class="mail" contenteditable="true">'+value.mail+'</td>\n' +
                         '                <td>\n' +
-                        '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modify">修改</button>\n' +
-                        '                    <button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>\n' +
+                        '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modifyUser">修改</button>\n' +
+                        '                    <button class="layui-btn layui-btn-normal layui-btn-sm deleteUser"> 删除</button>\n' +
                         '                </td>\n' +
                         '            </tr>')
                 })
 
-            })
+            },'json')
 
         }
         function getShowFile() {
             $('.tr').remove()
-            $('#file-table').prepend(' <thead>\n' +
+            $('#show-table').prepend(' <thead>\n' +
                 '            <tr class="tr">\n' +
                 '                <th >文件ID</th>\n' +
                 '                <th  >文件名</th>\n' +
@@ -106,9 +107,9 @@
                 '                <th>操作</th>\n' +
                 '            </tr>\n' +
                 '            </thead>')
-            $.post('#show-table',function (data) {
+            $.post('showfile',function (data) {
                 data.forEach(function (value) {
-                    var icon=typeIcon(value.type)
+                    var icon=typeIcon(value.filetype)
                     var size=FileSize(value.filesize)
 
                     $('#show-table').append('<tr class="tr" >\n' +
@@ -123,7 +124,7 @@
                         '                </td>\n' +
                         '            </tr>')
                 })
-            })
+            },'json')
 
         }
         function getShowShare() {
@@ -156,7 +157,7 @@
                         '                    <button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>\n' +
                         '                </td>\n' +
                         '            </tr>')
-                })
+                },'json')
             })
 
         }
@@ -198,6 +199,43 @@
                     break;
             }
         }
+        getShowUser()
+        $('#deleteUser').click(function () {
+            var id =$(this).parent().parent().attr('id')
+            $.post('deleteUser',{id:id},function (data) {
+                if(data.code==1){
+                    layer.msg('删除用户成功')
+                    getShowUser()
+                }
+
+            })
+        })
+
+        $('#modifyUser').click(function () {
+            var arr={
+                userId:$(this).parent().parent().attr('id'),
+                age:$(this).parent().siblings('.age').val(),
+                sex:$(this).parent().siblings('.sex').val(),
+                phone:$(this).parent().siblings('.phone').val(),
+                mail:$(this).parent().siblings('.mail').val()
+            }
+            $.post('modifyUser',arr,function (data) {
+                getShowUser()
+
+            })
+        })
+
+        $('.manageUser').click(function () {
+            getShowUser()
+        })
+        $('.manageFile').click(function () {
+            getShowFile()
+        })
+        $('.manageShare').click(function () {
+            getShowShare()
+        })
+
+
     })
 </script>
 </body>

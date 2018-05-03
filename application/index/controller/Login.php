@@ -14,7 +14,9 @@ class Login extends Controller{
     private $salt='er45wi6HRI21U42Eolkj';
     public function register(){
         if(Session::get('uinfo')){
-            $this->redirect('index/index');
+            if(Session::get('uinfo')['isadmin']==1){
+                $this->redirect('../admin/index/index');
+            }else $this->redirect('index/index');
         }
         else return  $this->fetch();
     }
@@ -50,7 +52,9 @@ class Login extends Controller{
     }
     public function login(){
         if(Session::get('uinfo')){
-              $this->redirect('index/index');
+            if(Session::get('uinfo')['isadmin']==1){
+                $this->redirect('../admin/index/index');
+            }else $this->redirect('index/index');
         }
         else return  $this->fetch();
     }
@@ -66,6 +70,9 @@ class Login extends Controller{
             $this->error('用户名或密码不正确！');
         }else{
             Session::set('uinfo',$info);
+            if($info['isadmin']==1){
+                $this->success('登陆成功','../admin/index/index');
+            }
             $this->success('登陆成功','index/index');
 
         }

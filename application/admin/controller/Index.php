@@ -19,7 +19,7 @@ class Index extends Controller{
         echo json_encode($userlist);
     }
     public function deleteUser(){
-        $user=$_POST['user'];
+        $user=$_POST['id'];
         db('bin')->where('userId',$user)->delete();
         db('share')->where('userId',$user)->delete();
         db('files')->where('userId',$user)->delete();
@@ -59,9 +59,9 @@ class Index extends Controller{
     }
     public function showfile(){
         $arr=[];
-        $listFile= db('files')->field('fileid,filename,filesize,filetype,userId')->order('userId')->select();
+        $listFile= db('files')->field('fileid,filename,filesize,filetype,userId,createtime')->order('userId')->select();
         foreach ($listFile as $value){
-            $username=db('userId')->where('userId',$value['userId'])->field('username')->find();
+            $username=db('user')->where('userId',$value['userId'])->field('username')->find();
            $value['username']=$username['username'];
            array_push($arr,$value);
         }
