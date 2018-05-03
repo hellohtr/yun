@@ -147,7 +147,7 @@
 
                     else var size=''
                     $('#show-table').append('<tr class="tr" >\n' +
-                        '                <td class="fileid">'+value.fileid+'</td>\n' +
+                        '                <td class="fileid">'+value.sid+'</td>\n' +
                         '                <td class="filename" contenteditable="true" >'+icon +value.name+'</td>\n' +
                         '                <td class="username" >'+value.username+'</td>\n' +
                         '                <td class="filesize" >'+size+'</td>\n' +
@@ -157,8 +157,8 @@
                         '                    <button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>\n' +
                         '                </td>\n' +
                         '            </tr>')
-                },'json')
-            })
+                })
+            },'json')
 
         }
         function FileSize(filesize) {

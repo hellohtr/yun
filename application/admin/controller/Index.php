@@ -95,7 +95,7 @@ class Index extends Controller{
         $arr=[];
         $share=db('share')->order('userId')->select();
         foreach ($share as $value){
-            $username=db('user')->where('fileid',$value['userId'])->field('filename')->find();
+            $username=db('user')->where('userId',$value['userId'])->field('username')->find();
             $value['username']=$username['username'];
             if($value['type']==0){
                 $name=db('folder')->where('folderid',$value['id'])->field('foldername')->find();
