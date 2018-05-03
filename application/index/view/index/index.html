@@ -131,25 +131,9 @@
                })
                 $.get('showfile',{path:id},function (data) {
                     data.forEach(function (value, index) {
-                        switch (value.filetype){
-                            case 1:var icon = '<div class="icons icons-image"></div>';break;
-                            case 2:var icon = '<div class="icons icons-documnet"></div>';break;
-                            case 3:var icon = '<div class="icons icons-music"></div>';break;
-                            case 4:var icon = '<div class="icons icons-video"></div>';break;
-                            case 5:var icon = '<div class="icons icons-other"></div>';break;
-                        }
-                        switch (value.filesize<1000?1:(value.filesize<1000*1000?2:3)){
-                            case 1:var size=value.filesize+'B';break;
-                            case 2:
-                                var num=(value.filesize/1000).toFixed(1);
-                                var size=num+'K';break;
-                            case 3:
-                                var num=(value.filesize/1000000).toFixed(1);
-                                var size=num+'M';break;
-                            case 4:
-                                var num=(value.filesize/1000000000).toFixed(1)
-                                var size=num+'G';break;
-                        }
+
+                        var icon=typeIcon(value.filetype)
+                       var size=FileSize(value.filesize)
                         $('#file-table').append(' <tr class="tr file" id='+value.fileid+' data-type='+value.filetype+'>\n' +
                             '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +'<span class="name">'+value.filename+'</span></td>\n' +
                             '                <td>'+size+'</td>\n' +
@@ -193,25 +177,8 @@
             history.replaceState({type:type},null,location.pathname + '?type='+type)
                 $.get('showtype',{type:type},function (data){
                     data.forEach(function (value,index) {
-                        switch (value.filetype){
-                            case 1:var icon = '<div class="icons icons-image"></div>';break;
-                            case 2:var icon = '<div class="icons icons-documnet"></div>';break;
-                            case 3:var icon = '<div class="icons icons-music"></div>';break;
-                            case 4:var icon = '<div class="icons icons-video"></div>';break;
-                            case 5:var icon = '<div class="icons icons-other"></div>';break;
-                        }
-                        switch (value.filesize<1000?1:(value.filesize<1000*1000?2:3)){
-                            case 1:var size=value.filesize+'B';break;
-                            case 2:
-                                var num=(value.filesize/1000).toFixed(1);
-                                var size=num+'K';break;
-                            case 3:
-                                var num=(value.filesize/1000000).toFixed(1);
-                                var size=num+'M';break;
-                            case 4:
-                                var num=(value.filesize/1000000000).toFixed(1)
-                                var size=num+'G';break;
-                        }
+                       var icon=typeIcon(value.filetype)
+                       var size=FileSize(value.filesize)
                         $('#file-table').append(' <tr class="tr file" id='+value.fileid+' data-type='+value.filetype+'>\n' +
                             '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +'<span class="name">'+value.filename+'</span></td>\n' +
                             '                <td>'+size+'</td>\n' +
