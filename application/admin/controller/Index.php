@@ -16,7 +16,7 @@ class Index extends Controller{
     }
     public function showUser(){
         $userlist=db('user')->where(['isadmin'=>0])->field('userId,username,phone,sex,age,mail')->select();
-        json_encode($userlist);
+        echo json_encode($userlist);
     }
     public function deleteUser(){
         $user=$_POST['user'];
@@ -65,7 +65,7 @@ class Index extends Controller{
            $value['username']=$username['username'];
            array_push($arr,$value);
         }
-        json_encode($arr);
+        echo json_encode($arr);
     }
     public function delDir($dir){  //删除文件夹及文件夹下的文件
         if(!is_dir($dir)){
@@ -106,11 +106,12 @@ class Index extends Controller{
             }
             array_push($arr,$value);
         }
+        echo json_encode($arr);
     }
     public function searchUser(){
         $search=$_POST['search'];
         $userlist=db('user')->where(['isadmin'=>0, 'username' => array('like','%'. $search.'%')])->field('userId,username,phone,sex,age,mail')->select();
-        json_encode($userlist);
+        echo json_encode($userlist);
     }
     public function searchFileByName(){
         $search=$_POST['search'];
@@ -121,12 +122,12 @@ class Index extends Controller{
             $value['username']=$username['username'];
             array_push($arr,$value);
         }
-        json_encode($arr);
+        echo json_encode($arr);
     }
     public function searchFileByUser(){
         $search=$_POST['search'];
-        $arr=[];
-        $user=db('user')->where(['username'=>array('like','%'.search.'%')])->field('userId,username')-> select();
+        $arr=array();
+        $user=db('user')->where(['username'=>array('like','%'.$search.'%')])->field('userId,username')-> select();
         foreach($user as $tmp){
             $listFile= db('files')->where('fileId',$tmp['userId'])-> field('fileid,filename,filesize,filetype,')->order('userId')->select();
             foreach ($listFile as $value){
@@ -134,15 +135,54 @@ class Index extends Controller{
                 array_push($arr,$value);
             }
         }
-        json_encode($arr);
+        echo json_encode($arr);
     }
 
     public function searchShareByFile(){
+        $search=$_POST['search'];
+        $arr=array();
+        $share=db('share')->order('userId')->select();
+        foreach ($share as $value){
+            $username=db('user')->where('fileid',$value['userId'])->field('filename')->find();
+            $value['username']=$username['username'];
+            if($value['type']==0){
+                $name=db('folder')->where(['folderid'=>$value['id'],'foldername'=>array('like','%'.$search.'%')])->field('foldername')->find();
+                if($name){
+                    $value['name']=$name['foldername'];
+                    array_push($arr,$value);
+                }
 
+            }else{
+                $name=db('files')->where(['fileid'=>$value['id'],'filename'=>array('like','%'.$search.'%')])->field('filename')->find();
+                $value['name']=$name['filename'];
+                array_push($arr,$value);
+            }
+
+        }
+        echo json_encode($arr);
     }
     public function searchShareByUser(){
+        $search=$_POST['search'];
+        $arr=array();
+        $user=db('user')->where (['username'=>array('like','%'.$search.'%')])->field('userId,username')->select();
+        foreach ($user as $tmp){
+            $share=db('share')->where('userId',$tmp['userId'])->select();
+            foreach ($share as $value){
+                $value['username']=$tmp['username'];
+                if($value['type']==0){
+                    $name=db('folder')->where('folderid',$value['id'])->field('foldername')->find();
+                    $value['name']=$name['foldername'];
+                }else {
+                    $name = db('files')->where('fileid', $value['id'])->field('filename')->find();
+                    $value['name'] = $name['filename'];
+                }
+                array_push($arr,$value);
+            }
+        }
+        echo json_encode($arr);
 
     }
+
 
 
 

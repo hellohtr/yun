@@ -236,27 +236,10 @@
             history.replaceState({bin:'bin'},null,location.pathname + '?bin=bin')
             $.get('showBin',function (data){
                 data.forEach(function (value,index) {
-                    switch (value.type){
-                        case 0:var icon='<i class="layui-icon fileicon">&#xe622;</i>';break;
-                        case 1:var icon = '<div class="icons icons-image"></div>';break;
-                        case 2:var icon = '<div class="icons icons-documnet"></div>';break;
-                        case 3:var icon = '<div class="icons icons-music"></div>';break;
-                        case 4:var icon = '<div class="icons icons-video"></div>';break;
-                        case 5:var icon = '<div class="icons icons-other"></div>';break;
-                    }
+                   var icon=typeIcon(value.type)
+
                     if(value.hasOwnProperty('filesize')){
-                        switch (value.filesize<1000?1:(value.filesize<1000*1000?2:3)){
-                            case 1:var size=value.filesize+'B';break;
-                            case 2:
-                                var num=(value.filesize/1000).toFixed(1);
-                                var size=num+'K';break;
-                            case 3:
-                                var num=(value.filesize/1000000).toFixed(1);
-                                var size=num+'M';break;
-                            case 4:
-                                var num=(value.filesize/1000000000).toFixed(1)
-                                var size=num+'G';break;
-                        }
+                        var size=FileSize(value.filesize)
                     }
                     else var size=''
 
@@ -509,26 +492,10 @@
             history.replaceState({search:search},null,location.pathname + '?search='+search)
             $.get('search',{search:search },function (data){
                 data.forEach(function (value,index) {
-                    switch (value.filetype){
-                        case 1:var icon = '<div class="icons icons-image"></div>';break;
-                        case 2:var icon = '<div class="icons icons-documnet"></div>';break;
-                        case 3:var icon = '<div class="icons icons-music"></div>';break;
-                        case 4:var icon = '<div class="icons icons-video"></div>';break;
-                        case 5:var icon = '<div class="icons icons-other"></div>';break;
-                    }
-                    switch (value.filesize<1000?1:(value.filesize<1000*1000?2:3)){
-                        case 1:var size=value.filesize+'B';break;
-                        case 2:
-                            var num=(value.filesize/1000).toFixed(1);
-                            var size=num+'K';break;
-                        case 3:
-                            var num=(value.filesize/1000000).toFixed(1);
-                            var size=num+'M';break;
-                        case 4:
-                            var num=(value.filesize/1000000000).toFixed(1)
-                            var size=num+'G';break;
-                    }
-                    $('#file-table').append(' <tr class="tr file" id='+value.fileid+'>\n' +
+                    var icon=typeIcon(value.filetype)
+                        var size=FileSize(value.filesize)
+
+                    $('#file-table').append(' <tr class="tr file" id='+value.fileid+'data-type='+value.filetype+'>\n' +
                         '                <td><div class="layui-unselect layui-form-checkbox" lay-skin="primary"><i class="layui-icon"></i></div>'+ icon +value.filename+'</td>\n' +
                         '                <td>'+size+'</td>\n' +
                         '                <td>'+value.createtime+'</td>\n' +
@@ -595,27 +562,9 @@
             history.replaceState({share:'share'},null,location.pathname + '?share=share')
             $.get('showShare',function (data){
                 data.forEach(function (value) {
-                    switch (value.type){
-                        case 0:var icon='<i class="layui-icon fileicon">&#xe622;</i>';break;
-                        case 1:var icon = '<div class="icons icons-image"></div>';break;
-                        case 2:var icon = '<div class="icons icons-documnet"></div>';break;
-                        case 3:var icon = '<div class="icons icons-music"></div>';break;
-                        case 4:var icon = '<div class="icons icons-video"></div>';break;
-                        case 5:var icon = '<div class="icons icons-other"></div>';break;
-                    }
+                    var icon=typeIcon(value.type)
                     if(value.hasOwnProperty('filesize')){
-                        switch (value.filesize<1000?1:(value.filesize<1000*1000?2:3)){
-                            case 1:var size=value.filesize+'B';break;
-                            case 2:
-                                var num=(value.filesize/1000).toFixed(1);
-                                var size=num+'K';break;
-                            case 3:
-                                var num=(value.filesize/1000000).toFixed(1);
-                                var size=num+'M';break;
-                            case 4:
-                                var num=(value.filesize/1000000000).toFixed(1)
-                                var size=num+'G';break;
-                        }
+                        var size=FileSize(value.filesize)
                     }
                     else var size=''
                     var url='http://'+location.host+"/yun/public/index/share/share?path="+value.id+"&&type="+value.type
@@ -650,9 +599,43 @@
             })
         })
 
+        function typeIcon(type) {   //图标分类
+            switch (type) {
+                case 0:
+                    return '<i class="layui-icon fileicon">&#xe622;</i>';
+                    break;
+                case 1:
+                    return '<div class="icons icons-image"></div>';
+                    break;
+                case 2:
+                    return '<div class="icons icons-documnet"></div>';
+                    break;
+                case 3:
+                    return '<div class="icons icons-music"></div>';
+                    break;
+                case 4:
+                    return '<div class="icons icons-video"></div>';
+                    break;
+                case 5:
+                    return '<div class="icons icons-other"></div>';
+                    break;
+            }
+        }
 
-
-
+        function FileSize(filesize) {
+            switch (filesize<1000?1:(filesize<1000*1000?2:3)){
+                case 1:return filesize+'B';break;
+                case 2:
+                    var num=(filesize/1000).toFixed(1);
+                    return num+'K';break;
+                case 3:
+                    var num=(filesize/1000000).toFixed(1);
+                    return num+'M';break;
+                case 4:
+                    var num=(filesize/1000000000).toFixed(1)
+                    return num+'G';break;
+            }
+        }
 
 
     })
