@@ -29,6 +29,10 @@
      ?>
     </a>
     <dl class="layui-nav-child"> <!-- 二级菜单 -->
+        <?php if(Session::get('uinfo')['isadmin']==1){
+        echo '<dd><a href="../../admin/index/index" class="seePersonal">回到管理界面</a></dd>';
+        }
+        ?>
         <dd><a href="javascript:;" class="seePersonal">查看个人资料</a></dd>
         <dd><a href="javascript:;" class="modifyPersonal">修改个人资料</a></dd>
         <dd><a href="javascript:;" class="modifyPasswd">修改密码</a></dd>

@@ -65,15 +65,18 @@ class Login extends Controller{
         $password  = md5(input('password').$this->salt);
         //查询用户表有没有这些信息的用户
 
-        $info =  db('user')->where("username='$username' and password='$password'")->find();
+        $info =  db('user')->where('username',$username)->find();
         if (empty($info)) {
-            $this->error('用户名或密码不正确！');
+            $this->error('用户名不存在','login/login');
         }else{
-            Session::set('uinfo',$info);
-            if($info['isadmin']==1){
-                $this->success('登陆成功','../admin/index/index');
-            }
-            $this->success('登陆成功','index/index');
+            if($info['password']==$password){
+                Session::set('uinfo',$info);
+                if($info['isadmin']==1){
+                    $this->success('登陆成功','../admin/index/index');
+                }
+                $this->success('登陆成功','index/index');
+            }else $this->error('密码错误','login/login');
+
 
         }
     }

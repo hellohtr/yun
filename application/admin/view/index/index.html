@@ -10,26 +10,30 @@
 </ul>
 <div class="container">
     <div class="container-top">
-        <!--<button type="button" class="layui-btn   layui-btn-normal layui-btn-sm" id="upload">-->
-            <!--<i class="layui-icon">&#xe67c;</i>上传文件-->
-        <!--</button>-->
-
-        <!--<div class="search" >-->
-
-        <!--<div class="layui-input-inline"><input type="text" id="searchU" class=" layui-input " placeholder="搜索您的文件" ></div>-->
-        <!--<i class="layui-icon " id="search1" style="float:right;color:#999;margin-right:10px">&#xe615;</i>-->
-        <!--</div>-->
-        <!--<div class="search" >-->
-        <!--<div class="layui-input-inline"><input type="text" id="searchF" class=" layui-input " placeholder="搜索您的文件" ></div>-->
-        <!--<i class="layui-icon " id="search2" style="float:right;color:#999;margin-right:10px">&#xe615;</i>-->
-        <!--</div>-->
-        <div style="">
+        <div id="SearchU">
+            <div class="search" style="margin-bottom: 5px">
+                <div class="layui-input-inline"><input type="text"  class=" layui-input " placeholder="搜索用户名"></div>
+                <i class="layui-icon " id="SearchUser" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
+            </div>
+        </div>
+        <div style="" id="SearchF" hidden>
 
             <div class="search" style="margin-bottom: 5px">
-                <div class="layui-input-inline"><input type="text" id="searchS" class=" layui-input " placeholder="搜索您的文件"></div>
-                <i class="layui-icon " id="search" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
+                <div class="layui-input-inline"><input type="text"  class=" layui-input " placeholder=""></div>
+                <i class="layui-icon " id="SearchFile" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
             </div>
-            <select name="city" lay-verify="required" style="float: right;height: 31px ;margin-right: 5px" >
+            <select name="choice" lay-verify="required" style="float: right;height: 31px ;margin-right: 5px" >
+                <option value="0">用户名</option>
+                <option value="1">文件名</option>
+            </select>
+        </div>
+        <div style="" id="SearchS" hidden>
+
+            <div class="search" style="margin-bottom: 5px">
+                <div class="layui-input-inline"><input type="text"  class=" layui-input " placeholder=""></div>
+                <i class="layui-icon " id="SearchShare" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
+            </div>
+            <select name="choice" lay-verify="required" style="float: right;height: 31px ;margin-right: 5px" >
                 <option value="0">用户名</option>
                 <option value="1">文件名</option>
             </select>
@@ -37,38 +41,19 @@
     </div>
     <div class="container-table">
         <table class="layui-table"  id="show-table">
-            <!--<thead>-->
-            <!--<tr class="tr">-->
-                <!--<th >分享ID</th>-->
-                <!--<th  >文件名</th>-->
-                <!--<th >所属用户</th>-->
-                <!--<th>文件大小</th>-->
-                <!--<th>创建时间</th>-->
-                <!--<th>操作</th>-->
-            <!--</tr>-->
-            <!--</thead>-->
-            <!--<tr class="tr">-->
-                <!--<td contenteditable="false" >232123423</td>-->
-                <!--<td class="age" contenteditable="true" >34545345</td>-->
-                <!--<td class="sex" contenteditable="true">3423434</td>-->
-                <!--<td class="phone" ><div class="icons icons-documnet"></div><span contenteditable="true">23432432</span></td>-->
-                <!--<td class="mail" contenteditable="true">3432432</td>-->
-                <!--<td>-->
-                    <!--<button  class="layui-btn layui-btn-normal layui-btn-sm modify">修改</button>-->
-                    <!--<button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>-->
-                <!--</td>-->
-            <!--</tr>-->
         </table>
-
     </div>
-
 </div>
 <script>
     $(function () {
         function  getShowUser() {
+            $('#SearchU').show()
+            $('#SearchF').hide()
+            $('#searchS').hide()
             $('.tr').remove()
-            $('#show-table').prepend('<thead>\n' +
-                '            <tr class="tr" >\n' +
+            $('.thead').remove()
+            $('#show-table').prepend('<thead class="thead">\n' +
+                '            <tr >\n' +
                 '                <th >用户名</th>\n' +
                 '                <th  >年龄</th>\n' +
                 '                <th >性别</th>\n' +
@@ -96,9 +81,13 @@
 
         }
         function getShowFile() {
+            $('#SearchU').hide()
+            $('#SearchF').show()
+            $('#SearchS').hide()
             $('.tr').remove()
-            $('#show-table').prepend(' <thead>\n' +
-                '            <tr class="tr">\n' +
+            $('.thead').remove()
+            $('#show-table').prepend(' <thead class="thead">\n' +
+                '            <tr >\n' +
                 '                <th >文件ID</th>\n' +
                 '                <th  >文件名</th>\n' +
                 '                <th >所属用户</th>\n' +
@@ -128,23 +117,27 @@
 
         }
         function getShowShare() {
+            $('#SearchU').hide()
+            $('#SearchF').hide()
+            $('#SearchS').show()
             $('.tr').remove()
-            $('#show-table').prepend('<tr class="tr">\n' +
+            $('.thead').remove()
+            $('#show-table').prepend(' <thead class="thead">\n' +
+                '            <tr >\n' +
                 '                <th >分享ID</th>\n' +
                 '                <th  >文件名</th>\n' +
                 '                <th >所属用户</th>\n' +
                 '                <th>文件大小</th>\n' +
                 '                <th>创建时间</th>\n' +
                 '                <th>操作</th>\n' +
-                '            </tr>')
+                '            </tr>\n' +
+                '            </thead>')
             $.post('showShare',function (data) {
                 data.forEach(function (value) {
-
                    var icon=typeIcon(value.type)
                     if(value.hasOwnProperty('filesize')){
                         var size=FileSize(value.filesize)
                         }
-
                     else var size=''
                     $('#show-table').append('<tr class="tr" >\n' +
                         '                <td class="fileid">'+value.sid+'</td>\n' +
@@ -159,7 +152,6 @@
                         '            </tr>')
                 })
             },'json')
-
         }
         function FileSize(filesize) {
             switch (filesize<1000?1:(filesize<1000*1000?2:3)){
@@ -235,7 +227,137 @@
             getShowShare()
         })
 
+        //查找用户
+        $('#SearchUser').click(function () {
+            var search= $(this).siblings('.layui-input-inline').children('input').val()
+            if(typeof(search) != "undefined"){
 
+            }
+            $('.tr').remove()
+            $.get('searchUser',{search:search},function (data) {
+                $('#show-table').append('<tr class="tr"  id='+data.userId+'>\n' +
+                    '                <td contenteditable="false">'+data.username+'</td>\n' +
+                    '                <td class="age" contenteditable="true" >'+data.age+'</td>\n' +
+                    '                <td class="sex" contenteditable="true">'+data.sex+'</td>\n' +
+                    '                <td class="phone" contenteditable="true">'+data.phone+'</td>\n' +
+                    '                <td class="mail" contenteditable="true">'+data.mail+'</td>\n' +
+                    '                <td>\n' +
+                    '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modifyUser">修改</button>\n' +
+                    '                    <button class="layui-btn layui-btn-normal layui-btn-sm deleteUser"> 删除</button>\n' +
+                    '                </td>\n' +
+                    '            </tr>')
+
+
+            },'json')
+        })
+
+        //查找文件
+        $('#SearchFile').click(function () {
+            $('.tr').remove()
+            var search= $(this).siblings('.layui-input-inline').children('input').val()
+            var choice=$(this).parent().siblings('select').val()
+            if(true){
+
+            if(choice ==0){
+                $.get('searchFileByUser',{search:search},function (data) {
+                    data.forEach(function (value) {
+                        var icon=typeIcon(value.filetype)
+                        var size=FileSize(value.filesize)
+                        $('#show-table').append('<tr class="tr" >\n' +
+                            '                <td class="fileid">'+value.fileid+'</td>\n' +
+                            '                <td class="filename" contenteditable="true" >'+icon+value.filename+'</td>\n' +
+                            '                <td class="username" >'+value.username+'</td>\n' +
+                            '                <td class="filesize" >'+size+'</td>\n' +
+                            '                <td class="createtime" >'+value.createtime+'</td>\n' +
+                            '                <td>\n' +
+                            '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modify">修改</button>\n' +
+                            '                    <button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>\n' +
+                            '                </td>\n' +
+                            '            </tr>')
+                    })
+
+                },'json')
+            }
+            else{
+                $.get('searchFileByName',{search:search},function (data) {
+                    data.forEach(function (value) {
+                        var icon=typeIcon(value.filetype)
+                        var size=FileSize(value.filesize)
+                        $('#show-table').append('<tr class="tr" >\n' +
+                            '                <td class="fileid">'+value.fileid+'</td>\n' +
+                            '                <td class="filename" contenteditable="true" >'+icon+value.filename+'</td>\n' +
+                            '                <td class="username" >'+value.username+'</td>\n' +
+                            '                <td class="filesize" >'+size+'</td>\n' +
+                            '                <td class="createtime" >'+value.createtime+'</td>\n' +
+                            '                <td>\n' +
+                            '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modify">修改</button>\n' +
+                            '                    <button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>\n' +
+                            '                </td>\n' +
+                            '            </tr>')
+                    })
+
+                },'json')
+            }
+            }else return
+
+
+        })
+
+
+        //查找分享
+        $('#SearchShare').click(function () {
+            var search= $(this).siblings('.layui-input-inline').children('input').val()
+            var choice=$(this).parent().siblings('select').val()
+            if(true){
+                $('.tr').remove()
+            if(choice ==0){
+                $.get('searchShareByUser',{search:search},function (data) {
+                    data.forEach(function (value) {
+                        var icon=typeIcon(value.type)
+                        if(value.hasOwnProperty('filesize')){
+                            var size=FileSize(value.filesize)
+                        }
+                        else var size=''
+                        $('#show-table').append('<tr class="tr" >\n' +
+                            '                <td class="fileid">'+value.sid+'</td>\n' +
+                            '                <td class="filename" contenteditable="true" >'+icon +value.name+'</td>\n' +
+                            '                <td class="username" >'+value.username+'</td>\n' +
+                            '                <td class="filesize" >'+size+'</td>\n' +
+                            '                <td class="createtime" >'+value.createtime+'</td>\n' +
+                            '                <td>\n' +
+                            '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modify">修改</button>\n' +
+                            '                    <button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>\n' +
+                            '                </td>\n' +
+                            '            </tr>')
+                    })
+                },'json')
+            }
+            else{
+                $.get('searchShareByFile',{search:search},function (data) {
+                    data.forEach(function (value) {
+                        var icon=typeIcon(value.type)
+                        if(value.hasOwnProperty('filesize')){
+                            var size=FileSize(value.filesize)
+                        }
+                        else var size=''
+                        $('#show-table').append('<tr class="tr" >\n' +
+                            '                <td class="fileid">'+value.sid+'</td>\n' +
+                            '                <td class="filename" contenteditable="true" >'+icon +value.name+'</td>\n' +
+                            '                <td class="username" >'+value.username+'</td>\n' +
+                            '                <td class="filesize" >'+size+'</td>\n' +
+                            '                <td class="createtime" >'+value.createtime+'</td>\n' +
+                            '                <td>\n' +
+                            '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modify">修改</button>\n' +
+                            '                    <button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>\n' +
+                            '                </td>\n' +
+                            '            </tr>')
+                    })
+                },'json')
+            }
+            }else return
+
+
+        })
     })
 </script>
 </body>

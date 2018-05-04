@@ -10,9 +10,13 @@ use think\Controller;
 use think\Session;
 class Index extends Controller{
     public function index(){
-       // if(Session::get('uinfo')){
-            return $this->fetch();
-    //    }else return redirect('../../index/login/login');
+        if(Session::get('uinfo')){
+            if(Session::get('uinfo')['isadmin']==1){
+                return $this->fetch();
+            }
+            else return redirect('../../index/index/index');
+
+        }else return redirect('../../index/login/login');
     }
     public function showUser(){
         $userlist=db('user')->where(['isadmin'=>0])->field('userId,username,phone,sex,age,mail')->select();
@@ -100,36 +104,38 @@ class Index extends Controller{
             if($value['type']==0){
                 $name=db('folder')->where('folderid',$value['id'])->field('foldername')->find();
                 $value['name']=$name['foldername'];
+
             }else{
-                $name=db('files')->where('fileid',$value['id'])->field('filename')->find();
+                $name=db('files')->where('fileid',$value['id'])->field('filename,filetype')->find();
                 $value['name']=$name['filename'];
+                $value['type']=$name['filetype'];
             }
             array_push($arr,$value);
         }
         echo json_encode($arr);
     }
     public function searchUser(){
-        $search=$_POST['search'];
+        $search=$_GET['search'];
         $userlist=db('user')->where(['isadmin'=>0, 'username' => array('like','%'. $search.'%')])->field('userId,username,phone,sex,age,mail')->select();
         echo json_encode($userlist);
     }
     public function searchFileByName(){
-        $search=$_POST['search'];
+        $search=$_GET['search'];
         $arr=[];
-        $listFile= db('files')->where(['filename'=>array('like','%'.$search.'%')])-> field('fileid,filename,filesize,filetype,userId')->order('userId')->select();
+        $listFile= db('files')->where(['filename'=>array('like','%'.$search.'%')])-> field('fileid,filename,filesize,filetype,userId,createtime')->order('userId')->select();
         foreach ($listFile as $value){
-            $username=db('userId')->where('userId',$value['userId'])->field('username')->find();
+            $username=db('user')->where('userId',$value['userId'])->field('username')->find();
             $value['username']=$username['username'];
             array_push($arr,$value);
         }
         echo json_encode($arr);
     }
     public function searchFileByUser(){
-        $search=$_POST['search'];
+        $search=$_GET['search'];
         $arr=array();
         $user=db('user')->where(['username'=>array('like','%'.$search.'%')])->field('userId,username')-> select();
         foreach($user as $tmp){
-            $listFile= db('files')->where('fileId',$tmp['userId'])-> field('fileid,filename,filesize,filetype,')->order('userId')->select();
+            $listFile= db('files')->where('userId',$tmp['userId'])-> field('fileid,filename,filesize,filetype,createtime')->order('userId')->select();
             foreach ($listFile as $value){
                 $value['username']=$tmp['username'];
                 array_push($arr,$value);
@@ -139,7 +145,7 @@ class Index extends Controller{
     }
 
     public function searchShareByFile(){
-        $search=$_POST['search'];
+        $search=$_GET['search'];
         $arr=array();
         $share=db('share')->order('userId')->select();
         foreach ($share as $value){
@@ -153,8 +159,9 @@ class Index extends Controller{
                 }
 
             }else{
-                $name=db('files')->where(['fileid'=>$value['id'],'filename'=>array('like','%'.$search.'%')])->field('filename')->find();
+                $name=db('files')->where(['fileid'=>$value['id'],'filename'=>array('like','%'.$search.'%')])->field('filename,filetype')->find();
                 $value['name']=$name['filename'];
+                $value['type']=$name['type'];
                 array_push($arr,$value);
             }
 
@@ -162,7 +169,7 @@ class Index extends Controller{
         echo json_encode($arr);
     }
     public function searchShareByUser(){
-        $search=$_POST['search'];
+        $search=$_GET['search'];
         $arr=array();
         $user=db('user')->where (['username'=>array('like','%'.$search.'%')])->field('userId,username')->select();
         foreach ($user as $tmp){
@@ -173,8 +180,9 @@ class Index extends Controller{
                     $name=db('folder')->where('folderid',$value['id'])->field('foldername')->find();
                     $value['name']=$name['foldername'];
                 }else {
-                    $name = db('files')->where('fileid', $value['id'])->field('filename')->find();
+                    $name = db('files')->where('fileid', $value['id'])->field('filename,filetype')->find();
                     $value['name'] = $name['filename'];
+                    $value['type']=$name['filetype'];
                 }
                 array_push($arr,$value);
             }

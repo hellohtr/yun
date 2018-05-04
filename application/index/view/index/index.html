@@ -220,7 +220,7 @@
         }
         $('.type-all').click(function () {
             getData(0)
-            history.pushState({path:GetParam('path')},null,location.pathname + '?path='+GetParam('0'))
+            history.pushState({path:GetParam('path')},null,location.pathname + '?path='+GetParam('path'))
         })
         $('.type-document').click(function () {
             getTypeData(2)
@@ -351,7 +351,7 @@
         //双击打开文件夹
         $('#file-table').delegate('tr.folder','dblclick',function(){
             getData(this.id)
-            history.pushState({path:GetParam('path')},null,location.pathname + '?search='+GetParam('path'))
+            history.pushState({path:GetParam('path')},null,location.pathname + '?path='+GetParam('path'))
         })
 
         //单击选择或取消选择
