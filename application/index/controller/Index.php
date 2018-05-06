@@ -8,6 +8,7 @@ use think\Session;
 
 class Index extends Controller
 {
+    private $salt='er45wi6HRI21U42Eolkj';
     public function index()
     {
         if (Session::get('uinfo')) {
@@ -91,35 +92,35 @@ class Index extends Controller
         } else {
             if (preg_match('/(png|jpg|gif|bmp|jpeg)/', $type)) {
                 $files['filetype'] = 1;
-                createFolder("upload/" . $files['userId'] . "/image/");
-                move_uploaded_file($_FILES["file"]["tmp_name"], "upload/{$files['userId']}/image/" . $datetime . '.' . $type);
+                createFolder("../upload/" . $files['userId'] . "/image/");
+                move_uploaded_file($_FILES["file"]["tmp_name"], "../upload/{$files['userId']}/image/" . $datetime . '.' . $type);
                 $files['filepath'] = "upload/{$files['userId']}/image/" . $datetime . '.' . $type;
                 db('files')->insert($files);
             } elseif (preg_match('/(avi|mp4|mov|mpeg|mpg|ram|qt)/', $type)) {
                 $files['filetype'] = 4;
-                createFolder("upload/" . $files['userId'] . "/video/");
-                move_uploaded_file($_FILES["file"]["tmp_name"], "upload/{$files['userId']}/video/" . $datetime . '.' . $type);
+                createFolder("../upload/" . $files['userId'] . "/video/");
+                move_uploaded_file($_FILES["file"]["tmp_name"], "../upload/{$files['userId']}/video/" . $datetime . '.' . $type);
                 $files['filepath'] = "upload/{$files['userId']}/video/" . $datetime . '.' . $type;
                 db('files')->insert($files);
             } elseif (preg_match('/(doc|docx|txt|xls|pdf|ppt)/', $type)) {
                 $files['filetype'] = 2;
                 $datetime = strtotime($files['createtime']);
-                createFolder("upload/" . $files['userId'] . "/document/");
-                move_uploaded_file($_FILES["file"]["tmp_name"], "upload/{$files['userId']}/document/" . $datetime . '.' . $type);
+                createFolder("../upload/" . $files['userId'] . "/document/");
+                move_uploaded_file($_FILES["file"]["tmp_name"], "../upload/{$files['userId']}/document/" . $datetime . '.' . $type);
                 $files['filepath'] = "upload/{$files['userId']}/document/" . $datetime . '.' . $type;
                 db('files')->insert($files);
             } elseif (preg_match('/(mp3|asf|asp|au|mid|wav|asx)/', $type)) {
                 $files['filetype'] = 3;
                 $datetime = strtotime($files['createtime']);
-                createFolder("upload/" . $files['userId'] . "/music/");
-                move_uploaded_file($_FILES["file"]["tmp_name"], "upload/{$files['userId']}/music/" . $datetime . '.' . $type[1]);
+                createFolder("../upload/" . $files['userId'] . "/music/");
+                move_uploaded_file($_FILES["file"]["tmp_name"], "../upload/{$files['userId']}/music/" . $datetime . '.' . $type);
                 $files['filepath'] = "upload/{$files['userId']}/music/" . $datetime . '.' . $type;
                 db('files')->insert($files);
             } else {
                 $files['filetype'] = 5;
                 $datetime = strtotime($files['createtime']);
-                createFolder("upload/" . $files['userId'] . "/other/");
-                move_uploaded_file($_FILES["file"]["tmp_name"], "upload/{$files['userId']}/other/" . $datetime . '.' . $type);
+                createFolder("../upload/" . $files['userId'] . "/other/");
+                move_uploaded_file($_FILES["file"]["tmp_name"], "../upload/{$files['userId']}/other/" . $datetime . '.' . $type);
                 $files['filepath'] = "upload/{$files['userId']}/other/" . $datetime . '.' . $type;
                 db('files')->insert($files);
             }
@@ -290,6 +291,7 @@ class Index extends Controller
                 db('files')->where('folderid',$tmp['id'])->update(['is_share' => 1]);
             }
         }
+        echo 1;
     }
 
     public function showfile()
@@ -347,9 +349,16 @@ class Index extends Controller
     public function deleteAll()
     {   //清空回收站
         $userId = Session::get('uinfo')['userId'];
-        db('bin')->where('userId', $userId)->delete();
-        db('files')->where(['userId' => $userId, 'is_recycle' => 1])->delete();
+
+        $file=db('files')->where(['userId' => $userId, 'is_recycle' => 1])->select();
+        foreach ($file as $value){
+            $url='../'.$value['filepath'];
+            unlink($url);
+        }
+
+        db('files')->where(['userId'=>$userId,'is_recycle'=>1])->delete();
         db('folder')->where(['userId' => $userId, 'is_recycle' => 1])->delete();
+        db('bin')->where('userId', $userId)->delete();
 
     }
 
@@ -393,6 +402,50 @@ class Index extends Controller
             }
         }
         echo json_encode($arr);
+    }
+
+    public function modifypassword(){
+        $old=$_POST['oldpassword'];
+        $new=$_POST['newpassword'];
+        $re=$_POST['repassword'];
+        $userId=Session::get('uinfo')['userId'];
+
+        $user=db('user')->where('userId',$userId)->field('password')->find();
+        $password  = md5($old.$this->salt);
+        if($password==$user['password']){
+            if(strlen($new)>=6  && strlen($re)>=6){
+                if($new==$re){
+                    $newpassword=md5($new.$this->salt);
+                    db('user')->where('userId',$userId)->update(['password'=>$newpassword]);
+                    echo 3;
+                }else echo 2;
+            }else{
+                echo 1;
+            }
+        }
+
+        else  echo 0;
+    }
+
+    public function getUserInformation(){
+        $userId=Session::get('uinfo')['userId'];
+        $user=db('user')->where('userId',$userId)->field('username,sex,age,phone,mail,createtime')->find();
+        echo json_encode($user);
+    }
+
+    public function updateUser(){
+        $userId=Session::get('uinfo')['userId'];
+        $data['age']=$_POST['age'];
+        $data['sex']=$_POST['sex'];
+        $data['phone']=$_POST['phone'];
+        $data['mail']=$_POST['mail'];
+        db('user')->where('userId',$userId)->update($data);
+        echo 1;
+    }
+    public function getFileUrl(){
+        $id=$_POST['id'];
+        $file=db('files')->where('fileId',$id)->field('filepath')->find();
+        echo $file['filepath'];
     }
 
 

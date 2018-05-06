@@ -1,49 +1,52 @@
 {include file="header"}
 
-<ul class="layui-nav layui-nav-tree" lay-filter="test" style="height: 100%;position:absolute;top: 0;padding-top: 60px"
-    id="menu">
-    <li class="layui-nav-item manageUser" ><a href="javascript:;">管理用户</a></li>
-    <li class="layui-nav-item manageFile"><a href="javascript:;">管理文件</a></li>
-    <li class="layui-nav-item manageShare"><a href="javascript:;">管理分享</a></li>
+<div class="content">
+    <ul class="layui-nav layui-nav-tree" lay-filter="test" style="height: 100%;width:200px;float:left"
+        id="menu">
+        <li class="layui-nav-item manageUser" ><a href="javascript:;">管理用户</a></li>
+        <li class="layui-nav-item manageFile"><a href="javascript:;">管理文件</a></li>
+        <li class="layui-nav-item manageShare"><a href="javascript:;">管理分享</a></li>
+    </ul>
+    <div class="container">
+        <div class="container_top">
+            <button type="button" class="layui-btn   layui-btn-normal layui-btn-sm" id="addUser" style="margin-left: 10px;margin-top: 10px">
+                创建用户
+            </button>
+            <div id="SearchU" style="height: 35px;float: right">
+                <div class="search">
+                    <div class="layui-input-inline"><input type="text"  class=" layui-input " placeholder="搜索用户名"></div>
+                    <i class="layui-icon " id="SearchUser" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
+                </div>
+            </div>
+            <div style=" height: 35px;float: right" id="SearchF" hidden>
 
+                <div class="search">
+                    <div class="layui-input-inline"><input type="text"  class=" layui-input " placeholder=""></div>
+                    <i class="layui-icon " id="SearchFile" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
+                </div>
+                <select name="choice" lay-verify="required" style="float: right;height: 31px ;margin-right: 5px;margin-top: 8px;" >
+                    <option value="0">用户名</option>
+                    <option value="1">文件名</option>
+                </select>
+            </div>
+            <div  style="height: 35px;float: right" id="SearchS" hidden>
 
-</ul>
-<div class="container">
-    <div class="container-top">
-        <div id="SearchU">
-            <div class="search" style="margin-bottom: 5px">
-                <div class="layui-input-inline"><input type="text"  class=" layui-input " placeholder="搜索用户名"></div>
-                <i class="layui-icon " id="SearchUser" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
+                <div class="search">
+                    <div class="layui-input-inline"><input type="text"  class=" layui-input " placeholder=""></div>
+                    <i class="layui-icon " id="SearchShare" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
+                </div>
+                <select name="choice" lay-verify="required" style="float: right;height: 31px ;margin-right: 5px;margin-top: 8px;" >
+                    <option value="0">用户名</option>
+                    <option value="1">文件名</option>
+                </select>
             </div>
         </div>
-        <div style="" id="SearchF" hidden>
-
-            <div class="search" style="margin-bottom: 5px">
-                <div class="layui-input-inline"><input type="text"  class=" layui-input " placeholder=""></div>
-                <i class="layui-icon " id="SearchFile" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
-            </div>
-            <select name="choice" lay-verify="required" style="float: right;height: 31px ;margin-right: 5px" >
-                <option value="0">用户名</option>
-                <option value="1">文件名</option>
-            </select>
+        <div class="container-table" style="position:absolute;top:50px;width:85%;height:80%;overflow: auto">
+                <table class="layui-table" id="show-table" style="width:100%;margin-top: 0"></table>
         </div>
-        <div style="" id="SearchS" hidden>
-
-            <div class="search" style="margin-bottom: 5px">
-                <div class="layui-input-inline"><input type="text"  class=" layui-input " placeholder=""></div>
-                <i class="layui-icon " id="SearchShare" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
-            </div>
-            <select name="choice" lay-verify="required" style="float: right;height: 31px ;margin-right: 5px" >
-                <option value="0">用户名</option>
-                <option value="1">文件名</option>
-            </select>
-        </div>
-    </div>
-    <div class="container-table">
-        <table class="layui-table"  id="show-table">
-        </table>
     </div>
 </div>
+
 <script>
     $(function () {
         function  getShowUser() {
@@ -64,12 +67,16 @@
                 '            </thead>')
             $.post('showUser',function (data) {
                 data.forEach(function (value) {
+                    var age = value.age?value.age:""
+                    var sex= value.sex?value.sex:""
+                    var phone=value.phone?value.phone:""
+                    var mail=value.mail?value.mail:""
                     $('#show-table').append('<tr class="tr"  id='+value.userId+'>\n' +
                         '                <td contenteditable="false">'+value.username+'</td>\n' +
-                        '                <td class="age" contenteditable="true" >'+value.age+'</td>\n' +
-                        '                <td class="sex" contenteditable="true">'+value.sex+'</td>\n' +
-                        '                <td class="phone" contenteditable="true">'+value.phone+'</td>\n' +
-                        '                <td class="mail" contenteditable="true">'+value.mail+'</td>\n' +
+                        '                <td class="age" contenteditable="true" >'+age+'</td>\n' +
+                        '                <td class="sex" contenteditable="true">'+sex+'</td>\n' +
+                        '                <td class="phone" contenteditable="true">'+phone+'</td>\n' +
+                        '                <td class="mail" contenteditable="true">'+mail+'</td>\n' +
                         '                <td>\n' +
                         '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modifyUser">修改</button>\n' +
                         '                    <button class="layui-btn layui-btn-normal layui-btn-sm deleteUser"> 删除</button>\n' +
@@ -87,12 +94,12 @@
             $('.tr').remove()
             $('.thead').remove()
             $('#show-table').prepend(' <thead class="thead">\n' +
-                '            <tr >\n' +
+                '            <tr  style="height: 35px">\n' +
                 '                <th >文件ID</th>\n' +
                 '                <th  >文件名</th>\n' +
-                '                <th >所属用户</th>\n' +
-                '                <th>文件大小</th>\n' +
-                '                <th>创建时间</th>\n' +
+                '                <th  >所属用户</th>\n' +
+                '                <th >文件大小</th>\n' +
+                '                <th >创建时间</th>\n' +
                 '                <th>操作</th>\n' +
                 '            </tr>\n' +
                 '            </thead>')
@@ -103,13 +110,13 @@
 
                     $('#show-table').append('<tr class="tr" >\n' +
                         '                <td class="fileid">'+value.fileid+'</td>\n' +
-                        '                <td class="filename" contenteditable="true" >'+icon+value.filename+'</td>\n' +
+                        '                <td class="filename"  >'+icon+'<span contenteditable="true" class="name" style="margin-left: 3px;width: 300px;height: 26px;display:inline-block">'+value.filename+'</span></td>\n' +
                         '                <td class="username" >'+value.username+'</td>\n' +
                         '                <td class="filesize" >'+size+'</td>\n' +
                         '                <td class="createtime" >'+value.createtime+'</td>\n' +
                         '                <td>\n' +
-                        '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modify">修改</button>\n' +
-                        '                    <button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>\n' +
+                        '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modifyFile">修改</button>\n' +
+                        '                    <button class="layui-btn layui-btn-normal layui-btn-sm deleteFile"> 删除</button>\n' +
                         '                </td>\n' +
                         '            </tr>')
                 })
@@ -140,14 +147,13 @@
                         }
                     else var size=''
                     $('#show-table').append('<tr class="tr" >\n' +
-                        '                <td class="fileid">'+value.sid+'</td>\n' +
-                        '                <td class="filename" contenteditable="true" >'+icon +value.name+'</td>\n' +
+                        '                <td class="shareid">'+value.sid+'</td>\n' +
+                        '                <td class="filename"  >'+icon +'<span class="name" style="margin-left: 3px">'+value.name+'</span></td>\n' +
                         '                <td class="username" >'+value.username+'</td>\n' +
                         '                <td class="filesize" >'+size+'</td>\n' +
                         '                <td class="createtime" >'+value.createtime+'</td>\n' +
                         '                <td>\n' +
-                        '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modify">修改</button>\n' +
-                        '                    <button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>\n' +
+                        '                    <button class="layui-btn layui-btn-normal layui-btn-sm deleteShare"> 删除</button>\n' +
                         '                </td>\n' +
                         '            </tr>')
                 })
@@ -192,15 +198,17 @@
             }
         }
         getShowUser()
-        $('#deleteUser').click(function () {
+
+        $(document).delegate('.deleteUser','click',function () {
             var id =$(this).parent().parent().attr('id')
             $.post('deleteUser',{id:id},function (data) {
-                if(data.code==1){
+                if(data==1){
                     layer.msg('删除用户成功')
                     getShowUser()
+
                 }
 
-            })
+            },'json')
         })
 
         $('#modifyUser').click(function () {
@@ -230,22 +238,27 @@
         //查找用户
         $('#SearchUser').click(function () {
             var search= $(this).siblings('.layui-input-inline').children('input').val()
-            if(typeof(search) != "undefined"){
 
-            }
             $('.tr').remove()
             $.get('searchUser',{search:search},function (data) {
-                $('#show-table').append('<tr class="tr"  id='+data.userId+'>\n' +
-                    '                <td contenteditable="false">'+data.username+'</td>\n' +
-                    '                <td class="age" contenteditable="true" >'+data.age+'</td>\n' +
-                    '                <td class="sex" contenteditable="true">'+data.sex+'</td>\n' +
-                    '                <td class="phone" contenteditable="true">'+data.phone+'</td>\n' +
-                    '                <td class="mail" contenteditable="true">'+data.mail+'</td>\n' +
-                    '                <td>\n' +
-                    '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modifyUser">修改</button>\n' +
-                    '                    <button class="layui-btn layui-btn-normal layui-btn-sm deleteUser"> 删除</button>\n' +
-                    '                </td>\n' +
-                    '            </tr>')
+                data.forEach(function (value) {
+                    var age = value.age?value.age:""
+                    var sex= value.sex?value.sex:""
+                    var phone=value.phone?value.phone:""
+                    var mail=value.mail?value.mail:""
+                    $('#show-table').append('<tr class="tr"  id='+value.userId+'>\n' +
+                        '                <td contenteditable="false">'+value.username+'</td>\n' +
+                        '                <td class="age" contenteditable="true" >'+age+'</td>\n' +
+                        '                <td class="sex" contenteditable="true">'+sex+'</td>\n' +
+                        '                <td class="phone" contenteditable="true">'+phone+'</td>\n' +
+                        '                <td class="mail" contenteditable="true">'+mail+'</td>\n' +
+                        '                <td>\n' +
+                        '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modifyUser">修改</button>\n' +
+                        '                    <button class="layui-btn layui-btn-normal layui-btn-sm deleteUser"> 删除</button>\n' +
+                        '                </td>\n' +
+                        '            </tr>')
+                })
+
 
 
             },'json')
@@ -265,13 +278,13 @@
                         var size=FileSize(value.filesize)
                         $('#show-table').append('<tr class="tr" >\n' +
                             '                <td class="fileid">'+value.fileid+'</td>\n' +
-                            '                <td class="filename" contenteditable="true" >'+icon+value.filename+'</td>\n' +
+                            '                <td class="filename"  >'+icon+'<span contenteditable="true" class="name" style="margin-left: 3px" >'+value.filename+'</span></td>\n' +
                             '                <td class="username" >'+value.username+'</td>\n' +
                             '                <td class="filesize" >'+size+'</td>\n' +
                             '                <td class="createtime" >'+value.createtime+'</td>\n' +
                             '                <td>\n' +
-                            '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modify">修改</button>\n' +
-                            '                    <button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>\n' +
+                            '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modifyFile">修改</button>\n' +
+                            '                    <button class="layui-btn layui-btn-normal layui-btn-sm deleteFile"> 删除</button>\n' +
                             '                </td>\n' +
                             '            </tr>')
                     })
@@ -285,13 +298,13 @@
                         var size=FileSize(value.filesize)
                         $('#show-table').append('<tr class="tr" >\n' +
                             '                <td class="fileid">'+value.fileid+'</td>\n' +
-                            '                <td class="filename" contenteditable="true" >'+icon+value.filename+'</td>\n' +
+                            '                <td class="filename" contenteditable="true" >'+icon+'<span contenteditable="true" class="name" style="margin-left: 3px" >'+value.filename+'</span></td>\n' +
                             '                <td class="username" >'+value.username+'</td>\n' +
                             '                <td class="filesize" >'+size+'</td>\n' +
                             '                <td class="createtime" >'+value.createtime+'</td>\n' +
                             '                <td>\n' +
-                            '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modify">修改</button>\n' +
-                            '                    <button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>\n' +
+                            '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modifyFile">修改</button>\n' +
+                            '                    <button class="layui-btn layui-btn-normal layui-btn-sm deleteFile"> 删除</button>\n' +
                             '                </td>\n' +
                             '            </tr>')
                     })
@@ -319,14 +332,13 @@
                         }
                         else var size=''
                         $('#show-table').append('<tr class="tr" >\n' +
-                            '                <td class="fileid">'+value.sid+'</td>\n' +
-                            '                <td class="filename" contenteditable="true" >'+icon +value.name+'</td>\n' +
+                            '                <td class="shareid">'+value.sid+'</td>\n' +
+                            '                <td class="filename"  >'+icon +'<span class="name" style="margin-left: 3px">'+value.name+'</span></td>\n' +
                             '                <td class="username" >'+value.username+'</td>\n' +
                             '                <td class="filesize" >'+size+'</td>\n' +
                             '                <td class="createtime" >'+value.createtime+'</td>\n' +
                             '                <td>\n' +
-                            '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modify">修改</button>\n' +
-                            '                    <button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>\n' +
+                            '                    <button class="layui-btn layui-btn-normal layui-btn-sm deleteShare"> 删除</button>\n' +
                             '                </td>\n' +
                             '            </tr>')
                     })
@@ -341,14 +353,13 @@
                         }
                         else var size=''
                         $('#show-table').append('<tr class="tr" >\n' +
-                            '                <td class="fileid">'+value.sid+'</td>\n' +
-                            '                <td class="filename" contenteditable="true" >'+icon +value.name+'</td>\n' +
+                            '                <td class="shareid">'+value.sid+'</td>\n' +
+                            '                <td class="filename"  >'+icon +'<span class="name" style="margin-left: 3px">'+value.name+'</span></td>\n' +
                             '                <td class="username" >'+value.username+'</td>\n' +
                             '                <td class="filesize" >'+size+'</td>\n' +
                             '                <td class="createtime" >'+value.createtime+'</td>\n' +
                             '                <td>\n' +
-                            '                    <button  class="layui-btn layui-btn-normal layui-btn-sm modify">修改</button>\n' +
-                            '                    <button class="layui-btn layui-btn-normal layui-btn-sm delete"> 删除</button>\n' +
+                            '                    <button class="layui-btn layui-btn-normal layui-btn-sm deleteShare"> 删除</button>\n' +
                             '                </td>\n' +
                             '            </tr>')
                     })
@@ -356,8 +367,156 @@
             }
             }else return
 
+        })
+        $(document).delegate('.modifyUser','click',function () {
+            var arr= {  userId: $(this).parent().parent().attr('id'),
+                sex:$(this).parent().siblings('.sex').text(),
+                phone:$(this).parent().siblings('.phone').text(),
+                mail:$(this).parent().siblings('.mail').text(),
+                age:$(this).parent().siblings('.age').text()
+            }
+            $.post('modifyUser',arr,function (data) {
+                if(data==1){
+                    layer.msg('修改用户信息成功')
+                }
+
+
+            })
+        })
+        $(document).delegate('.deleteUser','click',function () {
+            var userId = $(this).parent().parent().attr('id');
+            $.post('deleteUser',{userId:userId},function(data){
+                if(data.code==1){
+                    layer.msg('删除用户成功')
+                }
+
+            })
+        })
+
+        $(document).delegate('.modifyFile','click',function () {
+            var arr={
+                fileid:$(this).parent().siblings('.fileid').text(),
+                filename:$(this).parent().siblings('.filename').text(),
+
+            }
+
+            $.post('modifyFile',arr,function (data) {
+                if(data.code==1){
+                    layer.msg('修改文件成功')
+                    getShowFile()
+                }
+            })
+        })
+        $(document).delegate('.deleteFile','click',function () {
+            var fileid=$(this).parent().siblings('.fileid').text();
+            $.post('deleteFile',{fileid:fileid},function (data) {
+                if(data){
+                    layer.msg('删除文件成功')
+                    getShowFile()
+                }
+
+            })
+        })
+
+        $(document).delegate('.deleteShare','click',function () {    //删除分享
+            var shareid=$(this).parent().siblings('.shareid').text()
+            $.post('deleteShare',{shareid:shareid},function (data) {
+                if(data==1){
+                    layer.msg('删除分享成功')
+                    getShowShare()
+                }
+            })
+        })
+
+        $('#addUser').click(function () {
+            layer.open({
+                title: '添加用户',
+                btnAlign: 'c',
+                area: '500px',
+                btn: ['确认', '取消'],
+                content: '<form class="layui-form layui-form-pane" action="">\n' +
+                '        <div class="layui-form-item">\n' +
+                '          <label class="layui-form-label">用户名</label>\n' +
+                '          <div class="layui-input-inline">\n' +
+                '            <input type="text" name="age" id="Uname" required="" lay-verify="required" placeholder="请输入用户名" autocomplete="off"  class="layui-input" >\n' +
+                '          </div>\n' +
+                '        </div>\n' +
+                '        <div class="layui-form-item">\n' +
+                '          <label class="layui-form-label">密码</label>\n' +
+                '          <div class="layui-input-inline">\n' +
+                '            <input type="password" name="Upassword" id="Upassword" required="" lay-verify="required" placeholder="请输入密码" autocomplete="off"  class="layui-input" >\n' +
+                '          </div>\n' +
+                '        </div>\n' +
+                '        <div class="layui-form-item">\n' +
+                '          <label class="layui-form-label">是否管理员</label>\n' +
+                '<div class="layui-input-block">\n'+
+                '<select name="admin" id="isadmin" style="width: 192px;height: 38px;display: block" >\n'+
+                '<option value="0" style="text-align: center">普通用户</option>\n'+
+                '<option value="1"  style="text-align: center">管理员</option>\n'+
+                '</select>\n'+
+            '</div>\n'+
+                '        </div>\n' +
+                '        <div class="layui-form-item">\n' +
+                '          <label class="layui-form-label">年龄</label>\n' +
+                '          <div class="layui-input-inline">\n' +
+                '            <input type="text" name="age" id="Uage" required="" lay-verify="required" placeholder="请输入年龄" autocomplete="off"  class="layui-input" >\n' +
+                '          </div>\n' +
+                '        </div>\n' +
+                '        <div class="layui-form-item">\n' +
+                '          <label class="layui-form-label">性别</label>\n' +
+                '          <div class="layui-input-inline">\n' +
+                '            <input type="text" name="sex" id="Usex" required="" lay-verify="required" placeholder="请输入性别" autocomplete="off" class="layui-input" >\n' +
+                '          </div>\n' +
+                '        </div>\n' +
+                '        <div class="layui-form-item">\n' +
+                '          <label class="layui-form-label">电话号码</label>\n' +
+                '          <div class="layui-input-inline">\n' +
+                '            <input type="text" name="phone" id="Uphone" required="" lay-verify="required" placeholder="请输入电话号码" autocomplete="off" class="layui-input" >\n' +
+                '          </div>\n' +
+                '        </div>\n' +
+                '        <div class="layui-form-item">\n' +
+                '          <label class="layui-form-label">邮箱</label>\n' +
+                '          <div class="layui-input-inline">\n' +
+                '            <input type="text" name="mail" id="Umail" required="" lay-verify="required" placeholder="请输入邮箱" autocomplete="off" class="layui-input" >\n' +
+                '          </div>\n' +
+                '        </div>\n' +
+                '      </form>'
+
+                ,yes: function(index, layero){
+                    var age=$.trim($("#Uage").val());
+                    var sex=$.trim($("#Usex").val());
+                    var phone=$.trim($("#Uphone").val());
+                    var mail=$.trim($("#Umail").val());
+                    var username=$.trim($("#Uname").val());
+                    var password=$.trim($("#Upassword").val());
+                    var admin=$("#isadmin").val()
+                    if(!username){
+                        layer.msg('用户名不能为空')
+                    }else if(password.length <6){
+                        layer.msg('密码长度不能小于6')
+
+                    }else{
+                        $.post('addUser',{username:username,password:password,isadmin:admin, age:age,sex:sex,phone:phone,mail:mail},function (data) {
+                            switch (data){
+                                case '0':layer.msg("密码长度不能小于6");break;
+                                case '1':layer.msg("用户名已存在");break;
+                                case '2':{getShowUser()
+                                    layer.msg('添加用户成功');
+
+                                break;}
+                            }
+                        })
+                    }
+
+                }
+                ,btn2:function (index,layero) {
+
+                }
+            });
+
 
         })
+
     })
 </script>
 </body>

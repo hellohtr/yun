@@ -3,8 +3,8 @@
     <div style="width: 95%;height:85%;position: absolute;bottom: 0;margin-left: 2.5%;background: #fff">
         <div>
             <button class="layui-btn   layui-btn-normal layui-btn-sm" id="download" style="float: right;margin: 5px 7% 5px 0px"><i class="layui-icon" >&#xe61e;</i>下载</button>
-            <div class="fileshow">
-                <table class="layui-table"  id="file-table">
+            <div class="container-table" style="position:absolute;top:50px;width:100%;height:80%;overflow: auto">
+                <table class="layui-table"  id="file-table" style="width:100%;margin-top: 0">
                     <thead>
                     <tr>
                         <th style="width: 600px">文件名</th>
@@ -124,7 +124,7 @@
             if($('.layui-form-checked').length==1) {
                 if ($('.layui-form-checked').parent().parent().attr('data-type') != 0) {
                     $.get('download',{id:$('.layui-form-checked').parent().parent().attr('id')},function (data) {
-                        openDownloadDialog('../../'+data.url,data.name)
+                        openDownloadDialog('../../../'+data.url,data.name)
                     },'json')
                 }
                 else {

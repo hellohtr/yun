@@ -1,6 +1,12 @@
 {include file="header"}
-
-<ul class="layui-nav layui-nav-tree" lay-filter="test" style="height: 100%;position:absolute;top: 0;padding-top: 60px" id="menu">
+<div id="progress" style="width:100%;height:100%;background: rgba(0,0,0,0.6);position: absolute;top:0;z-index: 100;display: flex;flex-direction: column;justify-content: center;align-items: center;">
+    <h2 style="color: #fff;margin-bottom: 10px;">文件上传中</h2>
+    <div class="layui-progress layui-progress-big" lay-showPercent="yes" style="width:60%">
+        <div class="layui-progress-bar layui-bg-green" lay-percent="0%" id="progressbar"></div>
+    </div>
+</div>
+<div class="content">
+<ul class="layui-nav layui-nav-tree" lay-filter="test" style="height: 100%;width:200px;float:left" id="menu">
     <li class="layui-nav-item type-all" data-type="0"><a href="javascript:;">全部文件</a></li>
     <li class="layui-nav-item type-image" data-type="1"><a href="javascript:;">图片</a></li>
     <li class="layui-nav-item type-document" data-type="2"><a href="javascript:;">文档</a></li>
@@ -10,14 +16,15 @@
     <li class="layui-nav-item sharetable" data-type="share"><a href="javascript:;">我的分享</a></li>
     <li class="layui-nav-item bintable" data-type="bin"><a href="javascript:;">回收站</a></li>
 </ul>
+
 <div class="container">
-    <div class="container-top">
-        <button type="button" class="layui-btn   layui-btn-normal layui-btn-sm" id="upload">
+    <div class="container_top" style="line-height: 50px">
+        <button type="button" class="layui-btn   layui-btn-normal layui-btn-sm" id="upload" style="margin-left: 5px">
         <i class="layui-icon">&#xe67c;</i>上传文件
         </button>
         <input type="file" id="uploadfile" hidden>
-        <button class="layui-btn layui-btn-normal layui-btn-sm" id="cannelShare" style="float: left;margin-left: 10px;margin-bottom: 5px">取消分享</button>
-        <button class="layui-btn layui-btn-normal layui-btn-sm" id="recycle" style="float: left;margin-left: 10px">还原</button>
+        <button class="layui-btn layui-btn-normal layui-btn-sm" id="cannelShare" style="float: left;margin-left: 10px ;margin-top: 10px">取消分享</button>
+        <button class="layui-btn layui-btn-normal layui-btn-sm" id="recycle" style="float: left;margin-left: 10px;margin-top: 10px;">还原</button>
         <button class="layui-btn layui-btn-primary layui-btn-sm" id="newFolder"> <i class="layui-icon">&#xe7a0;</i>新建文件夹</button>
         <div class="layui-btn-group">
             <button class="layui-btn layui-btn-primary layui-btn-sm" id="download"><i class="layui-icon" >&#xe61e;</i>下载</button>
@@ -30,20 +37,14 @@
         <div class="layui-input-inline"><input type="text" id="search-content" class=" layui-input " placeholder="搜索您的文件" ></div>
         <i class="layui-icon " id="search" style="float:right;color:#999;margin-right:10px">&#xe615;</i>
     </div>
-        <button type="button" class="layui-btn   layui-btn-normal layui-btn-sm" id="clearall"  style="float: right;margin-right: 15px;margin-bottom: 5px">
+        <button type="button" class="layui-btn   layui-btn-normal layui-btn-sm" id="clearall"  style="float: right;margin-right: 15px;margin-top: 10px;">
             <i class="layui-icon">&#xe640;</i>清空回收站
         </button>
     </div>
-    <div class="filelist">
-        <span class="layui-breadcrumb">
-            <a href="{:url('index/index?path=0')}">全部文件</a>
 
-            <a><cite>正文</cite></a>
-       </span>
 
-    </div>
-    <div class="fileshow">
-        <table class="layui-table"  id="file-table">
+    <div class="container-table" style="position:absolute;top:50px;width:85%;height:80%;overflow: auto">
+        <table class="layui-table"  id="file-table" style="width:100%;margin-top: 0">
             <thead>
             <tr>
                 <th style="width: 600px">文件名</th>
@@ -54,6 +55,7 @@
         </table>
 
     </div>
+</div>
 </div>
 
 <script>
@@ -319,7 +321,7 @@
             $('#uploadfile').val('')
             $('#uploadfile').click()
         })
-
+        $('#progress').hide()
         //上传文件
         $('#uploadfile').change(function () {
             if(!this.value){
@@ -328,19 +330,33 @@
             var formData = new FormData();
             formData.append("file",this.files[0]);
             formData.append("parentid", GetParam('path'));
+            function onprogress(ev){
+                var loaded = ev.loaded;
+                var total = ev.total;
+                var per = Math.floor(100*loaded/total)
+                $('#progressbar').attr('lay-percent',per+'%')
+                layui.use('element', function(){
+                    var element = layui.element;
+                    element.render('progress')
+                });
+                if(per == 100){
+                    $('#progress').hide()
+                }
+            }
+            $('#progress').show()
             $.ajax({
                 url : 'upload',
                 type : 'POST',
                 data : formData,
                 processData : false,
                 contentType : false,
-                // xhr: function(){
-                //     var xhr = $.ajaxSettings.xhr();
-                    // if(xhr.upload) {
-                    //     xhr.upload.addEventListener("progress" , onprogress, false);
-                    //     return xhr;
-                    // }
-                // },
+                 xhr: function(){
+                    var xhr = $.ajaxSettings.xhr();
+                    if(xhr.upload) {
+                       xhr.upload.addEventListener("progress" , onprogress, false);
+                        return xhr;
+                    }
+                    },
                 success : function() {
                     getData(GetParam('path'))
                 }
@@ -349,10 +365,56 @@
         })
 
         //双击打开文件夹
-        $('#file-table').delegate('tr.folder','dblclick',function(){
-            getData(this.id)
-            history.pushState({path:GetParam('path')},null,location.pathname + '?path='+GetParam('path'))
+        // $('#file-table').delegate('tr.folder','dblclick',function(){
+        //
+        //     getData(this.id)
+        //     history.pushState({path:GetParam('path')},null,location.pathname + '?path='+GetParam('path'))
+        // })
+        $('#file-table').delegate('.tr','dblclick',function(){
+            var type=$(this).attr('data-type')
+            var fid=$(this).attr('id')
+
+            if(type==0){
+                getData(this.id)
+                history.pushState({path:GetParam('path')},null,location.pathname + '?path='+GetParam('path'))
+            }
+            else {
+
+                $.post('getFileUrL',{id:fid},function (data) {
+                    var url='http://'+location.hostname+'/yun/'+data
+                    switch (type){
+                        case '1': {
+                            layer.open({
+                                title: "图片",
+                                area: '500px',
+                                content: '<img style="width:400px;margin-left: 20px" src=' + url + '>  '
+                            });
+                            break;
+                        }
+                        case '3': {
+                            layer.open({
+                                title: "音乐",
+                                area: '500px',
+                                content: '<embed autoplay="false" src="'+url+'"  width="400px" height="150px" />  '
+                            });
+                            break;
+                        }
+                        case '4':{
+                            layer.open({
+                                title: "视频",
+                                area: '500px',
+                                content: '<video  src="'+url+'"  width="100%"  controls />  '
+                            });
+                            break;
+                        }
+
+                    }
+                })
+
+            }
+
         })
+
 
         //单击选择或取消选择
         $('#file-table').delegate('.tr','click',function(ev){
@@ -475,7 +537,7 @@
             if($('.layui-form-checked').length==1) {
                 if ($('.layui-form-checked').parent().parent().attr('data-type') != 0) {
                     $.get('download',{id:$('.layui-form-checked').parent().parent().attr('id')},function (data) {
-                        openDownloadDialog('../../'+data.url,data.name)
+                        openDownloadDialog('../../../'+data.url,data.name)
                     },'json')
                 }
                 else {
@@ -509,7 +571,16 @@
             }
             else{
                 $.post('addShare',{arr:arr},function (data) {
+                    if(data=='1'){
+                        var url='http://'+location.host+"/yun/public/index/share/share?path="+arr[0]['id']+"&&type="+arr[0]['type']
+                        layer.open({
+                           title: "分享信息",
+                            area: '500px',
+                            content:'<span>链接：</span><span> <a href='+url+'>'+url+'</a></span>'
 
+
+                        })
+                    }
                 },'json');
             }
         })

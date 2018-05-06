@@ -49,6 +49,8 @@
 
 </ul>
 
+
+
 <script>
     //注意：导航 依赖 element 模块，否则无法进行功能性操作
 
@@ -62,51 +64,163 @@
     $(function () {
 
         $('.seePersonal').click(function () {
-            layer.open({
-                title: '个人信息'
-                ,content: ''
-            });
+            $.get('../index/getUserInformation',function (data) {
+                var age = data.age?data.age:""
+                var sex= data.sex?data.sex:""
+                var phone=data.phone?data.phone:""
+                var mail=data.mail?data.mail:""
+                layer.open({
+                    title: '个人信息',
+                    area: '500px'
+                    ,content: '<div class="layui-form-item ">\n' +
+                    '    <label class="layui-form-label">用户名：</label>\n' +
+                    '        <label class="layui-form-label " style="text-align:left ;width: 300px" id="Username">'+data.username+'</label>\n' +
+                    '</div>\n' +
+                    '<div class="layui-form-item">\n' +
+                    '    <label class="layui-form-label">年龄：</label>\n' +
+                    '        <label class="layui-form-label " style="text-align:left;width: 300px"  id="Uage">'+age+ '</label>\n' +
+                    '</div>\n' +
+                    '<div class="layui-form-item">\n' +
+                    '    <label class="layui-form-label">性别：</label>\n' +
+                    '        <label class="layui-form-label" id="Usex" style="text-align:left;width: 300px">'+sex+'</label>\n' +
+                    '</div>\n' +
+                    '<div class="layui-form-item">\n' +
+                    '    <label class="layui-form-label">电话号码：</label>\n' +
+                    '        <label class="layui-form-label" id="Uphone" style="text-align:left;width: 300px"> '+phone+'</label>\n' +
+                    '</div>\n' +
+                    '<div class="layui-form-item">\n' +
+                    '    <label class="layui-form-label">邮箱：</label>\n' +
+                    '        <label class="layui-form-label" id="Umail" style="text-align:left;width: 300px">'+mail+'</label>\n' +
+                    '</div>\n'+
+                    '<div class="layui-form-item">\n' +
+                    '    <label class="layui-form-label">创建时间：</label>\n' +
+                    '        <label class="layui-form-label" id="Utime" style="text-align:left">'+data.createtime+'</label>\n' +
+                    '</div>'
+
+                });
+            },'json')
+
+
         })
         
         
         $('.modifyPersonal').click(function () {
-            layer.open({
-                title: '个人信息',
+            $.get('../index/getUserInformation',function (data) {
+                var age = data.age ? data.age : ""
+                var sex = data.sex ? data.sex : ""
+                var phone = data.phone ? data.phone : ""
+                var mail = data.mail ? data.mail : ""
+                layer.open({
+                    title: '修改个人信息',
+                    btnAlign: 'c',
+                    btn: ['确认', '取消'],
+                    content: '<form class="layui-form layui-form-pane" action="">\n' +
+                    '        <div class="layui-form-item">\n' +
+                    '          <label class="layui-form-label">年龄</label>\n' +
+                    '          <div class="layui-input-inline">\n' +
+                    '            <input type="text" name="age" id="Uage" required="" lay-verify="required" placeholder="请输入年龄" autocomplete="off"  class="layui-input" value='+age+'>\n' +
+                    '          </div>\n' +
+                    '        </div>\n' +
+                    '\t\n' +
+                    '        <div class="layui-form-item">\n' +
+                    '          <label class="layui-form-label">性别</label>\n' +
+                    '          <div class="layui-input-inline">\n' +
+                    '            <input type="text" name="sex" id="Usex" required="" lay-verify="required" placeholder="请输入性别" autocomplete="off" class="layui-input" value='+sex+'>\n' +
+                    '          </div>\n' +
+                    '        </div>\n' +
+                    '\t\n' +
+                    '        <div class="layui-form-item">\n' +
+                    '          <label class="layui-form-label">电话号码</label>\n' +
+                    '          <div class="layui-input-inline">\n' +
+                    '            <input type="text" name="phone" id="Uphone" required="" lay-verify="required" placeholder="请输入电话号码" autocomplete="off" class="layui-input" value='+phone+'>\n' +
+                    '          </div>\n' +
+                    '        </div>\n' +
+                    '\n' +
+                    '        <div class="layui-form-item">\n' +
+                    '          <label class="layui-form-label">邮箱</label>\n' +
+                    '          <div class="layui-input-inline">\n' +
+                    '            <input type="text" name="mail" id="Umail" required="" lay-verify="required" placeholder="请输入邮箱" autocomplete="off" class="layui-input" value='+mail+'>\n' +
+                    '          </div>\n' +
+                    '        </div>\n' +
+                    '      </form>'
+                    ,yes: function(index, layero){
+                        var age=$.trim($("#Uage").val());
+                        var sex=$.trim($("#Usex").val());
+                        var phone=$.trim($("#Uphone").val());
+                        var mail=$.trim($("#Umail").val());
+                        $.post('../index/updateUser',{age:age,sex:sex,phone:phone,mail:mail},function (data) {
+                            if(data){
+                                layer.msg("修改个人信息成功")
+                            }
+                        })
+                    }
+                    ,btn2:function (index,layero) {
 
-                content: ''
-            });
+                    }
+                });
+            },'json')
         })
         
         $('.modifyPasswd').click(function () {
             layer.open({
                 title: '修改密码',
-                closeBtn:2,
+                btnAlign: 'c',
+                btn: ['确认', '取消'],
                 content: '<form class="layui-form layui-form-pane" action="">\n' +
                 '               <div class="layui-form-item">\n' +
                 '                   <label class="layui-form-label">原始密码</label>\n' +
                 '                   <div class="layui-input-inline">\n' +
-                '                   <input type="password" name="oldpassword" required="" lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">\n' +
+                '                   <input type="password" name="oldpassword" id="oldpassword" required="" lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">\n' +
                 '                   </div>' +
                 '               </div>\n' +
                 '<div class="layui-form-item">\n' +
-            '                   <label class="layui-form-label">新密码</label>\n' +
-            '                   <div class="layui-input-inline">\n' +
-            '                   <input type="password" name="newpassword" required="" lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">\n' +
-            '                   </div>' +
-            '               </div>\n' +
+                '                   <label class="layui-form-label">新密码</label>\n' +
+                '                   <div class="layui-input-inline">\n' +
+                '                   <input type="password" name="newpassword" id="newpassword" required="" lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">\n' +
+                '                   </div>' +
+                '               </div>\n' +
                 '<div class="layui-form-item">\n' +
                 '                   <label class="layui-form-label">确认新密码</label>\n' +
                 '                   <div class="layui-input-inline">\n' +
-                '                   <input type="password" name="renewpassword" required="" lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">\n' +
+                '                   <input type="password" name="repassword" id="repassword" required="" lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">\n' +
                 '                   </div>' +
                 '               </div>\n' +
-                '<div class="layui-form-item">\n' +
-
                 '           </form>',
+                yes: function(index, layero){
+                    function Trim(str) {
+                        return str.replace(/(^\s*)|(\s*$)/g, "");
+                    }
+                    var oldpassword=$("#oldpassword").val();
+                    var newpassword=  $("#newpassword").val();
+                    var repassword=  $("#repassword").val();
+                    var old=Trim(oldpassword)
+                     var news=Trim(newpassword)
+                    var re=Trim(repassword)
+                    if(news.length<6 && res.length<6)
+                    {
+                        layer.msg('密码长度不能小于6');
+                    }else if(news!=re){
+                        layer.msg("新密码与确认新密码不一致")
+                    }else{
+                        $.post('../index/modifypassword',{oldpassword:oldpassword,newpassword:newpassword,repassword:repassword},function (data) {
+                            console.log(typeof data)
+                            switch (data){
+                                case '0': layer.msg('原始密码错误');break;
+                                case '1': layer.msg('新密码长度不能小于6');break;
+                                case '2': layer.msg('新密码与确认新密码不一致');break;
+                                case '3': layer.msg('修改密码成功');break;
+                            }
 
+                        })
+                    }
+            }
 
-            });
+        ,btn2: function(index, layero){
+                //按钮【按钮二】的回调
+                //return false 开启该代码可禁止点击该按钮关闭
+            },
         })
+        });
         
     })
 
